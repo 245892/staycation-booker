@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { properties } from '@/data/properties';
 import { useBookings } from '@/context/BookingContext';
+import { useWaitlist } from '@/context/WaitlistContext';
 import { Calendar } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,11 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useState, useMemo } from 'react';
 import { format, differenceInDays, addDays, isBefore, isSameDay } from 'date-fns';
-import { ArrowLeft, Users, Bed, Wifi, ChefHat, Waves, Eye } from 'lucide-react';
+import { ArrowLeft, Users, Bed, Wifi, ChefHat, Waves, Eye, Clock, Zap, Bell } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import heroImg from '@/assets/hero-staycation.jpg';
 import unitImg from '@/assets/unit-preview.jpg';
 import { cn } from '@/lib/utils';
+import { getDynamicPrice, isGapFillerDate } from '@/lib/pricing';
 
 const amenityIcons: Record<string, React.ReactNode> = {
   'King Bed': <Bed className="h-4 w-4" />,
@@ -25,8 +27,8 @@ const amenityIcons: Record<string, React.ReactNode> = {
 export default function PropertyDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const property = properties.find(p => p.id === id);
-  const { addBooking, getBookingsForProperty } = useBookings();
+  const { addBooking, getBookingsForProperty, bookings } = useBookings();
+  const { addToWaitlist } = useWaitlist();
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [guestName, setGuestName] = useState('');
@@ -34,12 +36,15 @@ export default function PropertyDetail() {
   const [guestPhone, setGuestPhone] = useState('');
   const [guests, setGuests] = useState(1);
   const [submitting, setSubmitting] = useState(false);
+  const [showWaitlist, setShowWaitlist] = useState(false);
+
+  const property = properties.find(p => p.id === id);
 
   const bookedDates = useMemo(() => {
     if (!property) return [];
-    const bookings = getBookingsForProperty(property.id);
+    const propertyBookings = getBookingsForProperty(property.id);
     const dates: Date[] = [];
-    bookings.forEach(b => {
+    propertyBookings.forEach(b => {
       let current = new Date(b.checkIn);
       const end = new Date(b.checkOut);
       while (isBefore(current, end) || isSameDay(current, end)) {
@@ -50,6 +55,17 @@ export default function PropertyDetail() {
     return dates;
   }, [property, getBookingsForProperty]);
 
+  const nights = dateRange?.from && dateRange?.to ? differenceInDays(dateRange.to, dateRange.from) : 0;
+
+  const pricing = useMemo(() => {
+    if (!dateRange?.from || !property) return null;
+    const isGap = isGapFillerDate(dateRange.from, bookings, property.id);
+    return getDynamicPrice(property.pricePerNight, dateRange.from, isGap);
+  }, [dateRange?.from, property, bookings]);
+
+  const effectivePrice = pricing?.price ?? (property?.pricePerNight ?? 0);
+  const total = nights * effectivePrice;
+
   if (!property) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -57,9 +73,6 @@ export default function PropertyDetail() {
       </div>
     );
   }
-
-  const nights = dateRange?.from && dateRange?.to ? differenceInDays(dateRange.to, dateRange.from) : 0;
-  const total = nights * property.pricePerNight;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,14 +102,31 @@ export default function PropertyDetail() {
       toast.success('Booking confirmed!', { description: `${property.name} · ${nights} night${nights > 1 ? 's' : ''}` });
       navigate('/');
     } else {
-      toast.error('These dates are no longer available. Please choose different dates.');
+      toast.error('These dates are no longer available.');
+      setShowWaitlist(true);
     }
     setSubmitting(false);
   };
 
+  const handleJoinWaitlist = () => {
+    if (!dateRange?.from || !dateRange?.to || !guestName || !guestEmail) {
+      toast.error('Please fill in your details and select dates');
+      return;
+    }
+    addToWaitlist({
+      propertyId: property.id,
+      guestName,
+      guestEmail,
+      guestPhone,
+      desiredCheckIn: dateRange.from.toISOString(),
+      desiredCheckOut: dateRange.to.toISOString(),
+    });
+    toast.success('Added to waitlist!', { description: "We'll notify you if these dates open up." });
+    setShowWaitlist(false);
+  };
+
   return (
     <div className="min-h-screen">
-      {/* Image header */}
       <div className="relative h-[40vh] min-h-[280px]">
         <img src={property.imageIndex % 2 === 0 ? heroImg : unitImg} alt={property.name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
@@ -107,7 +137,6 @@ export default function PropertyDetail() {
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-16 relative z-10 pb-12">
         <div className="grid lg:grid-cols-5 gap-8">
-          {/* Details */}
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-card rounded-xl p-6 border shadow-sm">
               <h1 className="font-display text-3xl font-bold mb-1">{property.name}</h1>
@@ -129,7 +158,6 @@ export default function PropertyDetail() {
               </div>
             </div>
 
-            {/* Calendar */}
             <div className="bg-card rounded-xl p-6 border shadow-sm">
               <h2 className="font-display text-xl font-semibold mb-4">Select Dates</h2>
               <Calendar
@@ -146,12 +174,21 @@ export default function PropertyDetail() {
             </div>
           </div>
 
-          {/* Booking form */}
           <div className="lg:col-span-2">
             <div className="bg-card rounded-xl p-6 border shadow-sm sticky top-20">
               <p className="text-2xl font-bold mb-1">
                 ₱{property.pricePerNight.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">/ night</span>
               </p>
+
+              {pricing && pricing.discount > 0 && (
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge className="bg-destructive/10 text-destructive border-destructive/20 gap-1">
+                    {pricing.label === 'Gap Filler Deal' ? <Zap className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                    {pricing.discount}% OFF
+                  </Badge>
+                  <span className="text-sm font-medium text-destructive">{pricing.label}</span>
+                </div>
+              )}
 
               {nights > 0 && (
                 <div className="bg-muted rounded-lg p-3 my-4 space-y-1 text-sm">
@@ -159,7 +196,16 @@ export default function PropertyDetail() {
                     <span>{format(dateRange!.from!, 'MMM d')} → {format(dateRange!.to!, 'MMM d, yyyy')}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>₱{property.pricePerNight.toLocaleString()} × {nights} night{nights > 1 ? 's' : ''}</span>
+                    <span>
+                      {pricing && pricing.discount > 0 ? (
+                        <>
+                          <span className="line-through text-muted-foreground">₱{property.pricePerNight.toLocaleString()}</span>
+                          {' '}₱{effectivePrice.toLocaleString()} × {nights} night{nights > 1 ? 's' : ''}
+                        </>
+                      ) : (
+                        <>₱{property.pricePerNight.toLocaleString()} × {nights} night{nights > 1 ? 's' : ''}</>
+                      )}
+                    </span>
                     <span className="font-semibold">₱{total.toLocaleString()}</span>
                   </div>
                 </div>
@@ -186,7 +232,17 @@ export default function PropertyDetail() {
                 <Button type="submit" className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90" size="lg" disabled={submitting || nights < 1}>
                   {nights < 1 ? 'Select Dates to Book' : `Confirm Booking · ₱${total.toLocaleString()}`}
                 </Button>
+
+                {showWaitlist && (
+                  <Button type="button" variant="outline" className="w-full gap-2" onClick={handleJoinWaitlist}>
+                    <Bell className="h-4 w-4" /> Join Waitlist for These Dates
+                  </Button>
+                )}
               </form>
+
+              <p className="text-xs text-muted-foreground mt-4 text-center">
+                Dates unavailable? You can join our waitlist and get notified if a slot opens up.
+              </p>
             </div>
           </div>
         </div>
