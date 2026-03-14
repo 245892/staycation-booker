@@ -84,6 +84,7 @@ export const properties: Property[] = [
     amenities: ['King Bed', 'Sofa Bed', 'WiFi', 'Kitchen', 'Pool Access', 'Bay View'],
     maxGuests: 4, pricePerNight: 3500, imageIndex: 0,
     gallery: [moa101Hero, moa101Detail, moa101View, moa101Bath, moa101Life],
+    rating: 4.9, bestFeature: 'Walking distance to MOA Arena', sqft: 32, wifi: '100Mbps',
   },
   {
     id: 'moa-102', name: 'Skyline Studio', floor: '15th Floor',
@@ -91,6 +92,7 @@ export const properties: Property[] = [
     amenities: ['King Bed', 'Sofa Bed', 'WiFi', 'Kitchen', 'Pool Access', 'City View'],
     maxGuests: 4, pricePerNight: 3200, imageIndex: 1,
     gallery: [moa102Hero, moa102Detail, moa102View, moa102Bath, moa102Life],
+    rating: 4.8, bestFeature: 'Panoramic city views from bed', sqft: 28, wifi: '50Mbps',
   },
   {
     id: 'moa-103', name: 'Sunset Haven', floor: '12th Floor',
@@ -98,6 +100,7 @@ export const properties: Property[] = [
     amenities: ['King Bed', 'Sofa Bed', 'WiFi', 'Kitchen', 'Pool Access', 'Sunset View'],
     maxGuests: 4, pricePerNight: 3800, imageIndex: 2,
     gallery: [moa103Hero, moa103Detail, moa103View, moa103Bath, moa103Life],
+    rating: 4.9, bestFeature: 'Premium interiors with warm lighting', sqft: 30, wifi: '150Mbps',
   },
   {
     id: 'moa-201', name: 'Harbor View Loft', floor: '20th Floor',
@@ -105,6 +108,7 @@ export const properties: Property[] = [
     amenities: ['King Bed', 'Sofa Bed', 'WiFi', 'Kitchen', 'Pool Access', 'Harbor View'],
     maxGuests: 4, pricePerNight: 4000, imageIndex: 3,
     gallery: moa201Gallery,
+    rating: 4.7, bestFeature: 'High-floor harbor view loft', sqft: 35, wifi: '100Mbps',
   },
   {
     id: 'moa-202', name: 'Coastal Retreat', floor: '18th Floor',
@@ -112,6 +116,7 @@ export const properties: Property[] = [
     amenities: ['King Bed', 'Sofa Bed', 'WiFi', 'Kitchen', 'Pool Access', 'Sea View'],
     maxGuests: 4, pricePerNight: 3600, imageIndex: 4,
     gallery: moa202Gallery,
+    rating: 4.8, bestFeature: 'Coastal-inspired serene escape', sqft: 31, wifi: '100Mbps',
   },
   {
     id: 'moa-203', name: 'Metro Luxe Suite', floor: '22nd Floor',
@@ -119,6 +124,7 @@ export const properties: Property[] = [
     amenities: ['King Bed', 'Sofa Bed', 'WiFi', 'Kitchen', 'Pool Access', 'Panoramic View'],
     maxGuests: 4, pricePerNight: 4200, imageIndex: 5,
     gallery: moa203Gallery,
+    rating: 5.0, bestFeature: 'Top-floor luxury with wrap-around views', sqft: 40, wifi: '200Mbps',
   },
   {
     id: 'moa-301', name: 'Garden Terrace', floor: '8th Floor',
@@ -126,6 +132,7 @@ export const properties: Property[] = [
     amenities: ['King Bed', 'Sofa Bed', 'WiFi', 'Kitchen', 'Pool Access', 'Garden View'],
     maxGuests: 4, pricePerNight: 3000, imageIndex: 6,
     gallery: moa301Gallery,
+    rating: 4.6, bestFeature: 'Tranquil garden terrace retreat', sqft: 29, wifi: '50Mbps',
   },
   {
     id: 'moa-302', name: 'Moonlight Studio', floor: '16th Floor',
@@ -133,6 +140,7 @@ export const properties: Property[] = [
     amenities: ['King Bed', 'Sofa Bed', 'WiFi', 'Kitchen', 'Pool Access', 'Night View'],
     maxGuests: 4, pricePerNight: 3400, imageIndex: 7,
     gallery: moa302Gallery,
+    rating: 4.8, bestFeature: 'Modern minimalist night-sky views', sqft: 28, wifi: '100Mbps',
   },
   {
     id: 'moa-303', name: 'Pearl Suite', floor: '25th Floor',
@@ -140,5 +148,6 @@ export const properties: Property[] = [
     amenities: ['King Bed', 'Sofa Bed', 'WiFi', 'Kitchen', 'Pool Access', 'Dual View'],
     maxGuests: 4, pricePerNight: 4500, imageIndex: 8,
     gallery: moa303Gallery,
+    rating: 4.9, bestFeature: 'Dual-aspect views of bay and city', sqft: 42, wifi: '200Mbps',
   },
 ];

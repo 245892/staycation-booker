@@ -15,11 +15,11 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Building2 className="h-7 w-7 text-secondary" />
-            <span className="font-display text-xl font-bold tracking-tight">RR Twins</span>
+            <span className="font-display text-xl font-bold tracking-tight">RR Twins Mall of Asia Staycation Units</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-6">
-            <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Properties</Link>
+            <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Units</Link>
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <Link to="/host/login">
@@ -40,7 +40,7 @@ export default function Navbar() {
             <span className="text-sm font-medium">Appearance</span>
             <ThemeToggle />
           </div>
-          <Link to="/" onClick={() => setOpen(false)} className="block text-sm font-medium">Properties</Link>
+          <Link to="/" onClick={() => setOpen(false)} className="block text-sm font-medium">Units</Link>
           <Link to="/host/login" onClick={() => setOpen(false)} className="block text-sm font-medium">Host Dashboard</Link>
         </div>
       )}

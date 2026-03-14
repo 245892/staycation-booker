@@ -8,6 +8,10 @@ export interface Property {
   pricePerNight: number;
   imageIndex: number;
   gallery?: string[];
+  rating?: number;
+  bestFeature?: string;
+  sqft?: number;
+  wifi?: string;
 }
 
 export interface Booking {

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { properties } from '@/data/properties';
 import PropertyCard from '@/components/PropertyCard';
 import heroImg from '@/assets/hero-staycation.jpg';
-import { MapPin, CalendarDays, Users, Building2, ShoppingBag, Briefcase, Sparkles, BellRing, Star } from 'lucide-react';
+import { MapPin, Users, Building2, ShoppingBag, Briefcase, Sparkles, BellRing, Star } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -88,7 +88,7 @@ function FeaturedSpotlight() {
           whileHover={{ y: -6, transition: { duration: 0.3 } }}
           className="w-full max-w-sm"
         >
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/40 border border-white/10"
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-slate-950/40 border border-white/10"
             style={{
               background: 'linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
               backdropFilter: 'blur(24px)',
@@ -163,7 +163,6 @@ const VIBES = [
 ];
 
 const Index = () => {
-  const [search, setSearch] = useState('');
   const [showProof, setShowProof] = useState(false);
   const [activeVibe, setActiveVibe] = useState<string | null>(null);
 
@@ -172,9 +171,9 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const filtered = properties.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = activeVibe 
+    ? properties.filter(p => p.amenities.some(a => a.toLowerCase().includes(activeVibe))) // Simple vibe mapping for demo
+    : properties;
 
   return (
     <div className="min-h-screen">
@@ -187,48 +186,25 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/20" />
         </div>
 
-        {/* Left: Text & Express Search */}
+        {/* Left: Text & CTA */}
         <div className="w-full lg:w-1/2 flex items-center justify-center lg:justify-end px-4 sm:px-6 lg:px-12 py-16 lg:py-24 z-10">
-          <div className="w-full max-w-lg lg:ml-auto">
+          <div className="w-full max-w-xl lg:ml-auto">
             <Badge variant="outline" className="mb-6 border-primary/30 text-primary bg-primary/5 px-3 py-1 text-xs">
               Direct Booking Exclusive
             </Badge>
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-[1.1] tracking-tight text-slate-900 dark:text-white">
-              Your Premium <span className="text-secondary dark:text-primary">Staycation</span> Awaits.
+            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-[1.05] tracking-tight text-slate-900 dark:text-slate-50">
+              Stay in the <span className="text-secondary dark:text-primary italic">Heart</span> of MOA.
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 text-lg mb-10 max-w-md leading-relaxed">
-              Skip the hidden fees. Discover hand-picked, luxury units at the Mall of Asia Complex.
+            <p className="text-slate-600 dark:text-slate-300 text-xl mb-12 max-w-md leading-relaxed">
+              Discover a curated collection of premium residences, hand-picked for quality and comfort.
             </p>
-
-            {/* Express Search Widget */}
-            <div className="bg-white/90 dark:bg-card/80 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl p-6 lg:p-8 shadow-2xl shadow-black/5 dark:shadow-black/20 relative z-20">
-              <div className="flex flex-col gap-6">
-                <div className="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-                  <div className="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-full"><MapPin className="h-5 w-5 text-slate-500" /></div>
-                  <div className="flex-1">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Where</p>
-                    <input type="text" placeholder="Mall of Asia Complex..." value={search} onChange={e => setSearch(e.target.value)} className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 dark:text-white font-semibold placeholder:text-slate-300 dark:placeholder:text-slate-600 outline-none" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
-                  <div className="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-full"><CalendarDays className="h-5 w-5 text-slate-500" /></div>
-                  <div className="flex-1">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">When</p>
-                    <input type="text" placeholder="Add dates" className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 dark:text-white font-semibold placeholder:text-slate-300 dark:placeholder:text-slate-600 outline-none" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-full"><Users className="h-5 w-5 text-slate-500" /></div>
-                  <div className="flex-1">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Who</p>
-                    <input type="text" placeholder="Add guests" className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 dark:text-white font-semibold placeholder:text-slate-300 dark:placeholder:text-slate-600 outline-none" />
-                  </div>
-                </div>
-                
-                <Button className="w-full py-6 mt-2 text-base font-bold rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 transition-all shadow-md shadow-primary/25">
-                  Search Availability
-                </Button>
-              </div>
+            <div className="flex flex-wrap gap-4">
+               <Button onClick={() => document.getElementById('units')?.scrollIntoView({ behavior: 'smooth' })} className="px-8 py-7 text-lg font-bold rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
+                 Browse Available Units
+               </Button>
+               <Button variant="outline" className="px-8 py-7 text-lg font-bold rounded-2xl border-2 hover:bg-slate-50 transition-all">
+                 Our Standards
+               </Button>
             </div>
           </div>
         </div>
@@ -296,22 +272,21 @@ const Index = () => {
           </div>
         </div>
       </section>
-
       {/* ═══════════════════════════════════════════════════════ */}
       {/* Featured Spotlight — Parallax Section                  */}
       {/* ═══════════════════════════════════════════════════════ */}
       <FeaturedSpotlight />
 
-
-      <section className="bg-slate-50 dark:bg-background border-t border-border/50">
+      {/* Listings */}
+      <section id="units" className="bg-slate-50 dark:bg-background border-t border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="mb-10 text-center sm:text-left">
-            <h2 className="font-display text-3xl font-bold text-slate-900 tracking-tight">Available Units</h2>
-            <p className="text-slate-500 mt-2">Discover our hand-picked selection of premium residences.</p>
+          <div className="mb-12 text-center">
+            <h2 className="font-display text-4xl font-bold text-slate-900 dark:text-slate-50 tracking-tight mb-4">Available Units</h2>
+            <p className="text-slate-500 dark:text-slate-300 text-lg max-w-2xl mx-auto">Discover our collection of 5-star units, each verified for quality and comfort.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filtered.map((p, index) => (
-              <PropertyCard key={p.id} property={p} isFeaturedBento={index === 0} />
+              <PropertyCard key={p.id} property={p} isFeaturedBento={false} />
             ))}
           </div>
           {filtered.length === 0 && (

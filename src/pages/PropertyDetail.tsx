@@ -64,7 +64,7 @@ const GalleryLightbox = ({
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-sm flex flex-col"
+        className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex flex-col"
       >
         <div className="flex items-center justify-between p-4 md:p-6 absolute top-0 w-full z-10">
           <span className="text-white/60 font-medium tracking-widest text-sm uppercase">
@@ -238,7 +238,7 @@ export default function PropertyDetail() {
 
       {/* High-Performance Unit Gallery */}
       <div className="max-w-[1400px] mx-auto pt-0 sm:pt-4 px-0 sm:px-6 relative group mb-8">
-        <button onClick={() => navigate(-1)} className="absolute top-6 left-4 sm:top-8 sm:left-10 bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/20 text-white p-2.5 rounded-full z-20 transition-all duration-200">
+        <button onClick={() => navigate(-1)} className="absolute top-6 left-4 sm:top-8 sm:left-10 bg-slate-950/40 hover:bg-slate-950/60 backdrop-blur-md border border-white/20 text-white p-2.5 rounded-full z-20 transition-all duration-200">
           <ArrowLeft className="h-5 w-5" />
         </button>
 
@@ -246,7 +246,7 @@ export default function PropertyDetail() {
         <div className="absolute bottom-6 right-4 sm:right-10 z-20 flex gap-3">
           <Button 
             variant="secondary" 
-            className="bg-black/60 hover:bg-black/80 text-white border-white/20 backdrop-blur-md font-semibold font-sans rounded-xl overflow-hidden group shadow-2xl transition-all h-11 px-5"
+            className="bg-slate-950/60 hover:bg-slate-950/80 text-white border-white/20 backdrop-blur-md font-semibold font-sans rounded-xl overflow-hidden group shadow-2xl transition-all h-11 px-5"
             onClick={() => setGalleryOpen(true)}
           >
             <Maximize className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
@@ -257,7 +257,7 @@ export default function PropertyDetail() {
         {/* Mobile Full-Bleed Layout */}
         <div className="block sm:hidden relative w-full h-[60vh] min-h-[400px]">
           <img src={galleryImages[0]} alt={property.name} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-90 pointer-events-none" />
           <div className="absolute bottom-24 left-4 z-10 flex gap-3 flex-col items-start text-white">
             <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 backdrop-blur-md flex gap-1.5 items-center px-2.5 py-1">
               <ShieldCheck className="w-3.5 h-3.5" /> Verified Property
@@ -271,7 +271,7 @@ export default function PropertyDetail() {
           {/* Main Hero Photo */}
           <div className="col-span-2 relative group-hover:brightness-95 hover:!brightness-110 transition-all duration-300 cursor-pointer overflow-hidden" onClick={() => { setPhotoIndex(0); setGalleryOpen(true); }}>
             <img loading="lazy" src={galleryImages[0]} alt={property.name} className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent opacity-80 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/10 to-transparent opacity-80 pointer-events-none" />
             <div className="absolute bottom-6 left-6 z-10 flex items-center gap-4 text-white">
               <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 backdrop-blur-md flex gap-1.5 items-center px-3 py-1.5 shadow-lg">
                 <ShieldCheck className="w-4 h-4" /> Verified Property
@@ -279,7 +279,7 @@ export default function PropertyDetail() {
               <span className="font-semibold tracking-widest text-sm text-white/90 uppercase drop-shadow-md">650 sq ft</span>
             </div>
             
-            <Button variant="outline" className="hidden lg:flex absolute top-6 right-6 bg-black/40 hover:bg-black/80 border-white/20 text-white backdrop-blur-md shadow-2xl z-10">
+            <Button variant="outline" className="hidden lg:flex absolute top-6 right-6 bg-slate-950/40 hover:bg-slate-950/80 border-white/20 text-white backdrop-blur-md shadow-2xl z-10">
               <PlayCircle className="w-4 h-4 mr-2" /> Virtual Tour
             </Button>
           </div>
@@ -288,7 +288,7 @@ export default function PropertyDetail() {
           <div className="col-span-1 flex flex-col gap-2">
             <div className="h-1/2 relative group-hover:brightness-95 hover:!brightness-110 transition-all duration-300 cursor-pointer overflow-hidden" onClick={() => { setPhotoIndex(1); setGalleryOpen(true); }}>
               <img loading="lazy" src={galleryImages[1]} alt="Bedroom Unit" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-50 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 to-transparent opacity-50 pointer-events-none" />
             </div>
             <div className="h-1/2 relative group-hover:brightness-95 hover:!brightness-110 transition-all duration-300 cursor-pointer overflow-hidden" onClick={() => { setPhotoIndex(2); setGalleryOpen(true); }}>
               <img loading="lazy" src={galleryImages[2]} alt="Living Area" className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
@@ -304,14 +304,14 @@ export default function PropertyDetail() {
           {/* Main Content (70%) */}
           <div className="w-full lg:w-[65%] xl:w-[70%] space-y-8">
             <div className="border-b pb-8">
-              <h1 className="font-display text-4xl font-bold tracking-tight text-slate-900 mb-2">{property.name}</h1>
-              <p className="text-lg text-slate-500 mb-6 font-medium">MOA Complex · {property.floor}</p>
+              <h1 className="font-display text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50 mb-2">{property.name}</h1>
+              <p className="text-lg text-slate-500 dark:text-slate-400 mb-6 font-medium">MOA Complex · {property.floor}</p>
               
               <div className="flex flex-wrap items-center gap-4 text-sm font-medium">
                 <span className="flex items-center gap-1.5 text-slate-900 bg-slate-100 px-2.5 py-1 rounded-md">
                   <Star className="h-4 w-4 fill-slate-900" /> 4.96
                 </span>
-                <span className="text-slate-500 underline decoration-slate-300 underline-offset-4 hover:text-slate-900 transition-colors duration-200 cursor-pointer">128 reviews</span>
+                <span className="text-slate-500 dark:text-slate-400 underline decoration-slate-300 underline-offset-4 hover:text-slate-900 dark:hover:text-slate-50 transition-colors duration-200 cursor-pointer">128 reviews</span>
                 <span className="text-slate-300">•</span>
                 <span className="flex items-center gap-1.5 text-slate-900">
                   <Award className="h-4 w-4 text-primary" /> Guest Favorite
@@ -322,17 +322,17 @@ export default function PropertyDetail() {
             <div className="flex gap-6 border-b pb-8 text-slate-900">
               <div className="flex items-center gap-3">
                 <Users className="h-6 w-6 text-slate-400" />
-                <div><span className="block font-semibold">Max guests</span><span className="text-slate-500 text-sm">{property.maxGuests} guests allowed</span></div>
+                <div><span className="block font-semibold">Max guests</span><span className="text-slate-500 dark:text-slate-400 text-sm">{property.maxGuests} guests allowed</span></div>
               </div>
               <div className="flex items-center gap-3">
                 <Bed className="h-6 w-6 text-slate-400" />
-                <div><span className="block font-semibold">Bedding</span><span className="text-slate-500 text-sm">1 King + Sofa Bed</span></div>
+                <div><span className="block font-semibold">Bedding</span><span className="text-slate-500 dark:text-slate-400 text-sm">1 King + Sofa Bed</span></div>
               </div>
             </div>
 
             <div className="border-b pb-8">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900 mb-4">About this space</h2>
-              <p className="text-slate-600 leading-relaxed text-lg">{property.description}</p>
+              <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50 mb-4">About this space</h2>
+              <p className="text-slate-600 dark:text-slate-300 leading-relaxed text-lg">{property.description}</p>
             </div>
 
             <div className="border-b pb-8">
@@ -381,8 +381,8 @@ export default function PropertyDetail() {
               {step === 1 && (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="mb-6">
-                    <p className="text-2xl font-bold font-display text-slate-900 tracking-tight">
-                      ₱{property.pricePerNight.toLocaleString()} <span className="text-sm font-normal text-slate-500 font-sans">night</span>
+                    <p className="text-2xl font-bold font-display text-slate-900 dark:text-slate-50 tracking-tight">
+                      ₱{property.pricePerNight.toLocaleString()} <span className="text-sm font-normal text-slate-500 dark:text-slate-400 font-sans">night</span>
                     </p>
                     {pricing && pricing.discount > 0 && (
                       <div className="flex items-center gap-2 mt-1">
@@ -399,12 +399,12 @@ export default function PropertyDetail() {
                       <PopoverTrigger asChild>
                         <button className="w-full flex items-center justify-between p-3 border-b border-slate-300 text-left hover:bg-slate-50 transition-colors">
                           <div>
-                            <span className="block text-[10px] font-bold uppercase text-slate-900 tracking-wider">Check-in</span>
-                            <span className="text-sm text-slate-500">{dateRange?.from ? format(dateRange.from, 'MM/dd/yyyy') : 'Add date'}</span>
+                            <span className="block text-[10px] font-bold uppercase text-slate-900 dark:text-slate-50 tracking-wider">Check-in</span>
+                            <span className="text-sm text-slate-500 dark:text-slate-400">{dateRange?.from ? format(dateRange.from, 'MM/dd/yyyy') : 'Add date'}</span>
                           </div>
                           <div className="border-l border-slate-300 pl-3">
-                            <span className="block text-[10px] font-bold uppercase text-slate-900 tracking-wider">Checkout</span>
-                            <span className="text-sm text-slate-500">{dateRange?.to ? format(dateRange.to, 'MM/dd/yyyy') : 'Add date'}</span>
+                            <span className="block text-[10px] font-bold uppercase text-slate-900 dark:text-slate-50 tracking-wider">Checkout</span>
+                            <span className="text-sm text-slate-500 dark:text-slate-400">{dateRange?.to ? format(dateRange.to, 'MM/dd/yyyy') : 'Add date'}</span>
                           </div>
                         </button>
                       </PopoverTrigger>
@@ -421,7 +421,7 @@ export default function PropertyDetail() {
                     </Popover>
                     
                     <div className="p-3">
-                      <Label htmlFor="guests" className="block text-[10px] font-bold uppercase text-slate-900 tracking-wider mb-1">Guests</Label>
+                      <Label htmlFor="guests" className="block text-[10px] font-bold uppercase text-slate-900 dark:text-slate-50 tracking-wider mb-1">Guests</Label>
                       <select 
                         id="guests" 
                         value={guests} 

@@ -64,25 +64,25 @@
   }
 
   .dark {
-    /* Inversed Slate Palette Injection */
-    --slate-900: 0 0% 100%;     /* #FFFFFF (Pure White for Main Headings) */
-    --slate-800: 210 40% 98%;
-    --slate-700: 214 32% 91%;   /* #E2E8F0 (Slate 200 for Body Text to soften glow) */
-    --slate-600: 213 27% 84%;
-    --slate-500: 215 20% 65%;   /* #94A3B8 (Slate 400 for Captions to keep secondary) */
+    /* Inversed Slate Palette Injection - WCAG AAA Optimized */
+    --slate-900: 210 40% 98%;   /* #F8FAFC (Slate-50 for Headings) */
+    --slate-800: 210 40% 96%;
+    --slate-700: 213 27% 84%;   /* #CBD5E1 (Slate-300 for Body Text) */
+    --slate-600: 214 32% 91%;
+    --slate-500: 215 20% 65%;   /* #94A3B8 (Slate-400 for Muted Text) */
     --slate-400: 215 16% 47%;
     --slate-300: 215 19% 35%;
     --slate-200: 215 25% 27%;
-    --slate-100: 215 28% 17%;
-    --slate-50: 222 47% 11%;    /* #0F172A (Deep Blue mapped to lightest slate classes to create soft dark cards) */
+    --slate-100: 222 47% 11%;   /* #0F172A (Slate-900 for Surfaces) */
+    --slate-50: 222 47% 5%;    /* #020617 (Slate-950 for Background) */
 
-    --background: 222 47% 5%; /* #020617 */
-    --foreground: 214 32% 91%; /* Slate-200 */
+    --background: 222 47% 5%; /* Slate-950 #020617 */
+    --foreground: 213 27% 84%; /* Slate-300 #CBD5E1 */
     
-    --card: 222 47% 8%; /* Slightly lighter than bg */
-    --card-foreground: 210 40% 98%;
+    --card: 222 47% 11%; /* Slate-900 #0F172A */
+    --card-foreground: 210 40% 98%; /* Slate-50 */
     
-    --popover: 222 47% 8%;
+    --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
     
     /* Lighter Blue (Elevated CTA contrast on dark backgrounds) #3B82F6 */
@@ -93,7 +93,7 @@
     --secondary: 46 65% 52%;
     --secondary-foreground: 222 47% 5%;
     
-    --muted: 217 32% 17%;
+    --muted: 222 47% 11%; /* Slate-900 */
     --muted-foreground: 215 20% 65%; /* Slate-400 #94A3B8 */
     
     --accent: 46 65% 52%;
@@ -124,11 +124,20 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    text-rendering: optimizeLegibility;
   }
   
   .dark body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-weight: 450; /* Prevent background bleeding */
+  }
+
+  /* Accessibility Sharpness: Subtle shadow for white text on dark backgrounds */
+  .dark .text-white, 
+  .dark .text-slate-50,
+  .dark h1, .dark h2, .dark h3, .dark h4 {
+    text-shadow: 0 0 1px rgba(255,255,255,0.05);
   }
 }
 
