@@ -426,7 +426,7 @@ export default function PropertyDetail() {
                         id="guests" 
                         value={guests} 
                         onChange={e => setGuests(Number(e.target.value))}
-                        className="w-full bg-transparent text-sm text-slate-900 focus:outline-none cursor-pointer appearance-none"
+                        className="w-full bg-transparent text-sm text-slate-900 dark:text-white dark:bg-slate-900 focus:outline-none cursor-pointer appearance-none"
                       >
                         {Array.from({length: property.maxGuests}, (_, i) => i + 1).map(num => (
                           <option key={num} value={num}>{num} guest{num > 1 ? 's' : ''}</option>
