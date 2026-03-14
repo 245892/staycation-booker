@@ -427,9 +427,9 @@ export default function PropertyDetail() {
                         <SelectTrigger id="guests" className="w-full bg-transparent border-0 px-0 py-0 h-auto text-sm text-slate-900 dark:text-white focus:ring-0 focus:ring-offset-0 shadow-none">
                           <SelectValue placeholder="Select guests" />
                         </SelectTrigger>
-                        <SelectContent className="dark:bg-slate-900 dark:border-slate-800">
+                        <SelectContent className="dark:bg-[#0f172a] dark:border-white/10">
                           {Array.from({length: property.maxGuests}, (_, i) => i + 1).map(num => (
-                            <SelectItem key={num} value={num.toString()} className="cursor-pointer dark:text-white dark:focus:bg-slate-800">
+                            <SelectItem key={num} value={num.toString()} className="cursor-pointer dark:text-white dark:focus:bg-white/10 dark:focus:text-white">
                               {num} guest{num > 1 ? 's' : ''}
                             </SelectItem>
                           ))}
