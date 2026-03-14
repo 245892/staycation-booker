@@ -15,6 +15,7 @@ import { DateRange } from 'react-day-picker';
 import heroImg from '@/assets/hero-staycation.jpg';
 import unitImg from '@/assets/unit-preview.jpg';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { getDynamicPrice, isGapFillerDate } from '@/lib/pricing';
@@ -422,16 +423,18 @@ export default function PropertyDetail() {
                     
                     <div className="p-3">
                       <Label htmlFor="guests" className="block text-[10px] font-bold uppercase text-slate-900 dark:text-white tracking-wider mb-1">Guests</Label>
-                      <select 
-                        id="guests" 
-                        value={guests} 
-                        onChange={e => setGuests(Number(e.target.value))}
-                        className="w-full bg-transparent text-sm text-slate-900 dark:text-white dark:bg-slate-900 focus:outline-none cursor-pointer appearance-none"
-                      >
-                        {Array.from({length: property.maxGuests}, (_, i) => i + 1).map(num => (
-                          <option key={num} value={num}>{num} guest{num > 1 ? 's' : ''}</option>
-                        ))}
-                      </select>
+                      <Select value={guests.toString()} onValueChange={(val) => setGuests(Number(val))}>
+                        <SelectTrigger id="guests" className="w-full bg-transparent border-0 px-0 py-0 h-auto text-sm text-slate-900 dark:text-white focus:ring-0 focus:ring-offset-0 shadow-none">
+                          <SelectValue placeholder="Select guests" />
+                        </SelectTrigger>
+                        <SelectContent className="dark:bg-slate-900 dark:border-slate-800">
+                          {Array.from({length: property.maxGuests}, (_, i) => i + 1).map(num => (
+                            <SelectItem key={num} value={num.toString()} className="cursor-pointer dark:text-white dark:focus:bg-slate-800">
+                              {num} guest{num > 1 ? 's' : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
