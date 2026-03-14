@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useBookings } from '@/context/BookingContext';
 import { useWaitlist } from '@/context/WaitlistContext';
@@ -6,10 +6,11 @@ import { properties } from '@/data/properties';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format, addDays, isBefore, isSameDay, eachDayOfInterval, startOfMonth, endOfMonth, addMonths, differenceInDays } from 'date-fns';
-import { LogOut, CalendarDays, Users, Building2, Zap, Bell, TrendingUp, ChevronRight, Home, CreditCard } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { LogOut, CalendarDays, Users, Building2, Zap, Bell, TrendingUp, ChevronRight, Home, CreditCard, Menu, X } from 'lucide-react';
+import { useMemo, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { findGaps } from '@/lib/pricing';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function HostDashboard() {
   const { isAuthenticated, logout } = useAuth();
@@ -17,6 +18,43 @@ export default function HostDashboard() {
   const { entries: waitlistEntries } = useWaitlist();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'bookings' | 'calendar' | 'waitlist'>('bookings');
+  const [dateRange, setDateRange] = useState<'month' | 'quarter' | 'year'>('month');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, [activeTab, dateRange]);
+
+  // Interactive Recharts Mock Data based on filter
+  const revenueData = useMemo(() => {
+    switch (dateRange) {
+      case 'year':
+        return [
+          { name: 'Jan', revenue: 45000 }, { name: 'Feb', revenue: 52000 }, { name: 'Mar', revenue: 48000 },
+          { name: 'Apr', revenue: 61000 }, { name: 'May', revenue: 59000 }, { name: 'Jun', revenue: 65000 },
+          { name: 'Jul', revenue: 72000 }, { name: 'Aug', revenue: 75000 }, { name: 'Sep', revenue: 68000 },
+          { name: 'Oct', revenue: 62000 }, { name: 'Nov', revenue: 54000 }, { name: 'Dec', revenue: 81000 }
+        ];
+      case 'quarter':
+        return [
+          { name: 'Week 1', revenue: 15000 }, { name: 'Week 2', revenue: 18000 }, { name: 'Week 3', revenue: 16500 },
+          { name: 'Week 4', revenue: 19000 }, { name: 'Week 5', revenue: 21000 }, { name: 'Week 6', revenue: 20500 },
+          { name: 'Week 7', revenue: 22000 }, { name: 'Week 8', revenue: 25000 }, { name: 'Week 9', revenue: 24000 },
+          { name: 'Week 10', revenue: 26000 }, { name: 'Week 11', revenue: 28000 }, { name: 'Week 12', revenue: 31000 }
+        ];
+      case 'month':
+      default:
+        return [
+          { name: '1st', revenue: 2500 }, { name: '4th', revenue: 3200 }, { name: '7th', revenue: 2800 },
+          { name: '10th', revenue: 4100 }, { name: '13th', revenue: 3900 }, { name: '16th', revenue: 4500 },
+          { name: '19th', revenue: 5200 }, { name: '22nd', revenue: 5500 }, { name: '25th', revenue: 4800 },
+          { name: '28th', revenue: 6200 }, { name: '31st', revenue: 5400 }
+        ];
+    }
+  }, [dateRange]);
 
   // Gap detection across all properties
   const allGaps = useMemo(() => {
@@ -31,8 +69,7 @@ export default function HostDashboard() {
   }, [bookings]);
 
   if (!isAuthenticated) {
-    navigate('/host/login', { replace: true });
-    return null;
+    return <Navigate to="/host/login" replace />;
   }
 
   const sorted = [...bookings].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -62,37 +99,49 @@ export default function HostDashboard() {
 
   return (
     <div className="min-h-screen bg-muted/20">
-      {/* Breadcrumbs */}
-      <div className="bg-background border-b sticky top-0 z-10 hidden sm:block">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center h-12 text-sm text-muted-foreground">
-          <Home className="h-4 w-4 mr-2" />
-          <span>Staycation Booker</span>
-          <ChevronRight className="h-4 w-4 mx-1 opacity-50" />
-          <span className="text-foreground font-medium">Host Dashboard</span>
-          <ChevronRight className="h-4 w-4 mx-1 opacity-50" />
-          <span className="text-foreground capitalize">{activeTab === 'calendar' ? 'Multi-Calendar' : activeTab}</span>
+      {/* Breadcrumbs & Mobile Header */}
+      <div className="bg-background border-b sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-[60px]">
+          <div className="flex items-center text-sm text-muted-foreground w-full truncate">
+            <Home className="h-4 w-4 mr-2 shrink-0 hidden sm:block" />
+            <span className="hidden sm:block shrink-0">Staycation Booker</span>
+            <ChevronRight className="h-4 w-4 mx-1 opacity-50 shrink-0 hidden sm:block" />
+            <span className="text-foreground font-medium shrink-0">Host Dashboard</span>
+            <ChevronRight className="h-4 w-4 mx-1 opacity-50 shrink-0" />
+            <span className="text-foreground capitalize truncate">{activeTab === 'calendar' ? 'Multi-Calendar' : activeTab}</span>
+          </div>
+          
+          <button 
+            className="lg:hidden p-2 -mr-2 min-w-[40px] flex items-center justify-center text-slate-500 hover:text-slate-900 bg-slate-50 rounded-md shrink-0 border border-border/50 shadow-sm transition-colors"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="grid lg:grid-cols-5 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12 relative">
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16">
           
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="hidden lg:block">
+          {/* Sidebar Drawer */}
+          <div className={cn(
+            "lg:w-64 shrink-0 lg:block space-y-6 lg:static absolute top-2 left-4 right-4 z-40 bg-background lg:bg-transparent p-6 lg:p-0 rounded-xl lg:rounded-none border lg:border-none shadow-xl lg:shadow-none transition-all duration-300",
+            isMobileMenuOpen ? "block" : "hidden"
+          )}>
+            <div>
               <h1 className="font-display text-2xl font-bold mb-1">Dashboard</h1>
               <p className="text-sm text-muted-foreground mb-6">Manage properties</p>
             </div>
 
-            <nav className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+            <nav className="flex flex-col gap-2">
               {(['bookings', 'calendar', 'waitlist'] as const).map(tab => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
+                  onClick={() => { setActiveTab(tab); setIsMobileMenuOpen(false); }}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all min-w-max lg:min-w-0 duration-300",
+                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300",
                     activeTab === tab 
-                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" 
+                      ? "bg-primary text-primary-foreground shadow-sm" 
                       : "hover:bg-muted text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -104,53 +153,172 @@ export default function HostDashboard() {
               ))}
             </nav>
 
-            <Button variant="outline" className="w-full justify-start mt-auto" onClick={() => { logout(); navigate('/host/login'); }}>
+            <Button variant="outline" className="w-full justify-start mt-6 text-slate-600 hover:text-destructive hover:border-destructive/30 hover:bg-destructive/10 transition-colors" onClick={() => { logout(); navigate('/host/login'); }}>
               <LogOut className="h-4 w-4 mr-2" /> Sign Out
             </Button>
           </div>
 
+          {/* Mobile Overlay */}
+          {isMobileMenuOpen && (
+            <div 
+              className="fixed inset-0 bg-black/40 z-30 lg:hidden backdrop-blur-sm"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+          )}
+
           {/* Main Content */}
-          <div className="lg:col-span-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex-1 min-w-0 space-y-12 sm:space-y-16 animate-in fade-in slide-in-from-bottom-4 duration-500">
             
             {/* SaaS Metrics Row */}
             {activeTab === 'bookings' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
-                <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><CreditCard className="w-16 h-16"/></div>
-                  <p className="text-sm text-muted-foreground font-medium mb-1">Total Revenue</p>
-                  <p className="text-2xl font-bold font-display">₱{totalRevenue.toLocaleString()}</p>
-                  <div className="mt-2 flex items-center text-xs text-success font-medium">
-                    <TrendingUp className="h-3 w-3 mr-1"/>
-                    <span>+12% from last month</span>
-                  </div>
+              <div className="space-y-6">
+                <div className="flex justify-between items-center sm:hidden mb-4">
+                  <h2 className="font-display text-lg font-semibold">Overview</h2>
+                  <select 
+                    value={dateRange}
+                    onChange={(e) => setDateRange(e.target.value as any)}
+                    className="border border-border bg-background rounded-md text-sm py-1.5 px-3 focus:ring-1 focus:ring-ring"
+                  >
+                    <option value="month">This Month</option>
+                    <option value="quarter">This Quarter</option>
+                    <option value="year">Last Year</option>
+                  </select>
                 </div>
-                
-                <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Building2 className="w-16 h-16"/></div>
-                  <p className="text-sm text-muted-foreground font-medium mb-1">Occupancy Rate</p>
-                  <p className="text-2xl font-bold font-display">{occupancyRate}%</p>
-                  <div className="mt-2 flex items-center text-xs text-success font-medium">
-                    <TrendingUp className="h-3 w-3 mr-1"/>
-                    <span>+5% from last month</span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
+                  <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><CreditCard className="w-16 h-16"/></div>
+                    <p className="text-sm text-muted-foreground font-medium mb-1">Total Revenue</p>
+                    {isLoading ? (
+                      <div className="space-y-2 mt-2">
+                        <div className="h-8 bg-muted rounded animate-pulse w-1/2"></div>
+                        <div className="h-4 bg-muted rounded animate-pulse w-3/4"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold font-display">₱{totalRevenue.toLocaleString()}</p>
+                        <div className="mt-2 flex items-center text-xs text-success font-medium">
+                          <TrendingUp className="h-3 w-3 mr-1"/>
+                          <span>+12% from last month</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  
+                  <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Building2 className="w-16 h-16"/></div>
+                    <p className="text-sm text-muted-foreground font-medium mb-1">Occupancy Rate</p>
+                    {isLoading ? (
+                      <div className="space-y-2 mt-2">
+                        <div className="h-8 bg-muted rounded animate-pulse w-1/2"></div>
+                        <div className="h-4 bg-muted rounded animate-pulse w-3/4"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold font-display">{occupancyRate}%</p>
+                        <div className="mt-2 flex items-center text-xs text-success font-medium">
+                          <TrendingUp className="h-3 w-3 mr-1"/>
+                          <span>+5% from last month</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Users className="w-16 h-16"/></div>
+                    <p className="text-sm text-muted-foreground font-medium mb-1">Confirmed Bookings</p>
+                    {isLoading ? (
+                      <div className="space-y-2 mt-2">
+                        <div className="h-8 bg-muted rounded animate-pulse w-1/3"></div>
+                        <div className="h-4 bg-muted rounded animate-pulse w-2/3"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold font-display">{confirmed}</p>
+                        <div className="mt-2 flex items-center text-xs text-muted-foreground font-medium">
+                          <span>{sorted.length - confirmed} pending actions</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Zap className="w-16 h-16"/></div>
+                    <p className="text-sm text-muted-foreground font-medium mb-1">Gap Alerts</p>
+                    {isLoading ? (
+                      <div className="space-y-2 mt-2">
+                        <div className="h-8 bg-muted rounded animate-pulse w-1/3"></div>
+                        <div className="h-4 bg-muted rounded animate-pulse w-2/3"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold font-display">{allGaps.length}</p>
+                        <div className="mt-2 flex items-center text-xs text-destructive font-medium">
+                          <Zap className="h-3 w-3 mr-1"/>
+                          <span>Action required</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
-                <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Users className="w-16 h-16"/></div>
-                  <p className="text-sm text-muted-foreground font-medium mb-1">Confirmed Bookings</p>
-                  <p className="text-2xl font-bold font-display">{confirmed}</p>
-                  <div className="mt-2 flex items-center text-xs text-muted-foreground font-medium">
-                    <span>{sorted.length - confirmed} pending actions</span>
+                {/* Analytical Chart Row */}
+                <div className="bg-card rounded-xl border shadow-sm p-6 overflow-hidden">
+                  <div className="flex justify-between items-center mb-6">
+                    <div>
+                      <h3 className="font-display text-lg font-semibold">Revenue Overview</h3>
+                      <p className="text-sm text-muted-foreground">Performance across your portfolio</p>
+                    </div>
+                    <div className="hidden sm:block">
+                      <select 
+                        value={dateRange}
+                        onChange={(e) => setDateRange(e.target.value as any)}
+                        className="border border-border bg-background rounded-md text-sm py-1.5 px-3 focus:ring-1 focus:ring-ring focus:outline-none"
+                      >
+                        <option value="month">This Month</option>
+                        <option value="quarter">This Quarter</option>
+                        <option value="year">Last Year</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
-
-                <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Zap className="w-16 h-16"/></div>
-                  <p className="text-sm text-muted-foreground font-medium mb-1">Gap Alerts</p>
-                  <p className="text-2xl font-bold font-display">{allGaps.length}</p>
-                  <div className="mt-2 flex items-center text-xs text-destructive font-medium">
-                    <Zap className="h-3 w-3 mr-1"/>
-                    <span>Action required</span>
+                  <div className="h-[300px] w-full">
+                    {isLoading ? (
+                      <div className="w-full h-full bg-muted/40 rounded-lg animate-pulse" />
+                    ) : (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={revenueData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                        <XAxis 
+                          dataKey="name" 
+                          stroke="hsl(var(--muted-foreground))" 
+                          fontSize={12} 
+                          tickLine={false} 
+                          axisLine={false} 
+                        />
+                        <YAxis 
+                          stroke="hsl(var(--muted-foreground))" 
+                          fontSize={12} 
+                          tickLine={false} 
+                          axisLine={false}
+                          tickFormatter={(value) => `₱${value >= 1000 ? (value / 1000) + 'k' : value}`}
+                        />
+                        <Tooltip 
+                          cursor={{ stroke: 'hsl(var(--muted-foreground))', strokeWidth: 1, strokeDasharray: '4 4' }}
+                          contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', borderRadius: '8px' }}
+                          itemStyle={{ color: 'hsl(var(--foreground))', fontWeight: 600 }}
+                          labelStyle={{ color: 'hsl(var(--muted-foreground))', marginBottom: '4px' }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="revenue" 
+                          stroke="#1E3A8A" 
+                          strokeWidth={3} 
+                          dot={{ r: 0 }} 
+                          activeDot={{ r: 6, fill: '#1E3A8A', stroke: 'hsl(var(--card))', strokeWidth: 2 }} 
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                    )}
                   </div>
                 </div>
               </div>

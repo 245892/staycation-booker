@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Building2, Menu, X } from 'lucide-react';
+import { Menu, X, Building2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -19,9 +20,12 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center gap-6">
             <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Properties</Link>
-            <Link to="/host/login">
-              <Button variant="outline" size="sm">Host Dashboard</Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Link to="/host/login">
+                <Button variant="outline" size="sm">Host Dashboard</Button>
+              </Link>
+            </div>
           </div>
 
           <button className="md:hidden" onClick={() => setOpen(!open)}>
@@ -32,6 +36,10 @@ export default function Navbar() {
 
       {open && (
         <div className="md:hidden border-t bg-card px-4 py-4 space-y-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium">Appearance</span>
+            <ThemeToggle />
+          </div>
           <Link to="/" onClick={() => setOpen(false)} className="block text-sm font-medium">Properties</Link>
           <Link to="/host/login" onClick={() => setOpen(false)} className="block text-sm font-medium">Host Dashboard</Link>
         </div>

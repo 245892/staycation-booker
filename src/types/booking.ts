@@ -7,6 +7,7 @@ export interface Property {
   maxGuests: number;
   pricePerNight: number;
   imageIndex: number;
+  gallery?: string[];
 }
 
 export interface Booking {
@@ -19,6 +20,7 @@ export interface Booking {
   checkOut: string;
   guests: number;
   status: 'pending' | 'confirmed' | 'cancelled';
+  paymentStatus?: 'pending' | 'paid';
   createdAt: string;
   totalPrice: number;
 }
