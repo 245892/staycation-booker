@@ -5,8 +5,8 @@ import { useWaitlist } from '@/context/WaitlistContext';
 import { properties } from '@/data/properties';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { format, addDays, isBefore, isSameDay, eachDayOfInterval, startOfMonth, endOfMonth, addMonths } from 'date-fns';
-import { LogOut, CalendarDays, Users, Building2, Zap, Bell } from 'lucide-react';
+import { format, addDays, isBefore, isSameDay, eachDayOfInterval, startOfMonth, endOfMonth, addMonths, differenceInDays } from 'date-fns';
+import { LogOut, CalendarDays, Users, Building2, Zap, Bell, TrendingUp, ChevronRight, Home, CreditCard } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { findGaps } from '@/lib/pricing';
@@ -38,6 +38,10 @@ export default function HostDashboard() {
   const sorted = [...bookings].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   const confirmed = bookings.filter(b => b.status === 'confirmed').length;
 
+  const totalRevenue = bookings.filter(b => b.status === 'confirmed').reduce((acc, b) => acc + b.totalPrice, 0);
+  const occupiedNights = bookings.filter(b => b.status === 'confirmed').reduce((acc, b) => acc + differenceInDays(new Date(b.checkOut), new Date(b.checkIn)), 0);
+  const occupancyRate = properties.length ? Math.min(100, Math.round((occupiedNights / (properties.length * 30)) * 100)) : 0;
+
   const getPropertyName = (id: string) => properties.find(p => p.id === id)?.name ?? id;
 
   // Multi-calendar data
@@ -57,55 +61,100 @@ export default function HostDashboard() {
 
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="font-display text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">Manage your staycation bookings</p>
-          </div>
-          <Button variant="outline" onClick={() => { logout(); navigate('/host/login'); }}>
-            <LogOut className="h-4 w-4 mr-2" /> Sign Out
-          </Button>
+    <div className="min-h-screen bg-muted/20">
+      {/* Breadcrumbs */}
+      <div className="bg-background border-b sticky top-0 z-10 hidden sm:block">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center h-12 text-sm text-muted-foreground">
+          <Home className="h-4 w-4 mr-2" />
+          <span>Staycation Booker</span>
+          <ChevronRight className="h-4 w-4 mx-1 opacity-50" />
+          <span className="text-foreground font-medium">Host Dashboard</span>
+          <ChevronRight className="h-4 w-4 mx-1 opacity-50" />
+          <span className="text-foreground capitalize">{activeTab === 'calendar' ? 'Multi-Calendar' : activeTab}</span>
         </div>
+      </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: 'Total Bookings', value: bookings.length, icon: CalendarDays, color: 'text-secondary' },
-            { label: 'Confirmed', value: confirmed, icon: Users, color: 'text-green-600' },
-            { label: 'Waitlisted', value: waitlistEntries.length, icon: Bell, color: 'text-amber-600' },
-            { label: 'Gap Alerts', value: allGaps.length, icon: Zap, color: 'text-destructive' },
-          ].map(stat => (
-            <div key={stat.label} className="bg-card rounded-xl p-5 border shadow-sm">
-              <div className="flex items-center gap-3">
-                <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                <div>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="grid lg:grid-cols-5 gap-8">
+          
+          {/* Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            <div className="hidden lg:block">
+              <h1 className="font-display text-2xl font-bold mb-1">Dashboard</h1>
+              <p className="text-sm text-muted-foreground mb-6">Manage properties</p>
+            </div>
+
+            <nav className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+              {(['bookings', 'calendar', 'waitlist'] as const).map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all min-w-max lg:min-w-0 duration-300",
+                    activeTab === tab 
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" 
+                      : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {tab === 'bookings' && <CalendarDays className="h-4 w-4" />}
+                  {tab === 'calendar' && <Building2 className="h-4 w-4" />}
+                  {tab === 'waitlist' && <Bell className="h-4 w-4" />}
+                  <span className="capitalize">{tab === 'calendar' ? 'Multi-Calendar' : tab}</span>
+                </button>
+              ))}
+            </nav>
+
+            <Button variant="outline" className="w-full justify-start mt-auto" onClick={() => { logout(); navigate('/host/login'); }}>
+              <LogOut className="h-4 w-4 mr-2" /> Sign Out
+            </Button>
+          </div>
+
+          {/* Main Content */}
+          <div className="lg:col-span-4 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            
+            {/* SaaS Metrics Row */}
+            {activeTab === 'bookings' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
+                <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><CreditCard className="w-16 h-16"/></div>
+                  <p className="text-sm text-muted-foreground font-medium mb-1">Total Revenue</p>
+                  <p className="text-2xl font-bold font-display">₱{totalRevenue.toLocaleString()}</p>
+                  <div className="mt-2 flex items-center text-xs text-success font-medium">
+                    <TrendingUp className="h-3 w-3 mr-1"/>
+                    <span>+12% from last month</span>
+                  </div>
+                </div>
+                
+                <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Building2 className="w-16 h-16"/></div>
+                  <p className="text-sm text-muted-foreground font-medium mb-1">Occupancy Rate</p>
+                  <p className="text-2xl font-bold font-display">{occupancyRate}%</p>
+                  <div className="mt-2 flex items-center text-xs text-success font-medium">
+                    <TrendingUp className="h-3 w-3 mr-1"/>
+                    <span>+5% from last month</span>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Users className="w-16 h-16"/></div>
+                  <p className="text-sm text-muted-foreground font-medium mb-1">Confirmed Bookings</p>
+                  <p className="text-2xl font-bold font-display">{confirmed}</p>
+                  <div className="mt-2 flex items-center text-xs text-muted-foreground font-medium">
+                    <span>{sorted.length - confirmed} pending actions</span>
+                  </div>
+                </div>
+
+                <div className="bg-card rounded-xl p-5 border shadow-sm relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity"><Zap className="w-16 h-16"/></div>
+                  <p className="text-sm text-muted-foreground font-medium mb-1">Gap Alerts</p>
+                  <p className="text-2xl font-bold font-display">{allGaps.length}</p>
+                  <div className="mt-2 flex items-center text-xs text-destructive font-medium">
+                    <Zap className="h-3 w-3 mr-1"/>
+                    <span>Action required</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          {(['bookings', 'calendar', 'waitlist'] as const).map(tab => (
-            <Button
-              key={tab}
-              variant={activeTab === tab ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setActiveTab(tab)}
-              className="capitalize"
-            >
-              {tab === 'bookings' && <CalendarDays className="h-4 w-4 mr-1.5" />}
-              {tab === 'calendar' && <Building2 className="h-4 w-4 mr-1.5" />}
-              {tab === 'waitlist' && <Bell className="h-4 w-4 mr-1.5" />}
-              {tab === 'calendar' ? 'Multi-Calendar' : tab}
-            </Button>
-          ))}
-        </div>
+            )}
 
         {/* Bookings Tab */}
         {activeTab === 'bookings' && (
@@ -281,6 +330,8 @@ export default function HostDashboard() {
             )}
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useState, useMemo } from 'react';
 import { format, differenceInDays, addDays, isBefore, isSameDay } from 'date-fns';
-import { ArrowLeft, Users, Bed, Wifi, ChefHat, Waves, Eye, Clock, Zap, Bell } from 'lucide-react';
+import { ArrowLeft, Users, Bed, Wifi, ChefHat, Waves, Eye, Clock, Zap, Bell, CheckCircle2 } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import heroImg from '@/assets/hero-staycation.jpg';
 import unitImg from '@/assets/unit-preview.jpg';
@@ -35,6 +35,7 @@ export default function PropertyDetail() {
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
   const [guests, setGuests] = useState(1);
+  const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [showWaitlist, setShowWaitlist] = useState(false);
 
@@ -176,73 +177,134 @@ export default function PropertyDetail() {
 
           <div className="lg:col-span-2">
             <div className="bg-card rounded-xl p-6 border shadow-sm sticky top-20">
-              <p className="text-2xl font-bold mb-1">
-                ₱{property.pricePerNight.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">/ night</span>
-              </p>
+              {/* Progress Indicator */}
+              <div className="flex items-center justify-between mb-8 relative px-2">
+                <div className="absolute left-0 top-1/2 w-full h-0.5 bg-muted -z-10 -translate-y-1/2"></div>
+                <div className="absolute left-0 top-1/2 h-0.5 bg-primary -z-10 -translate-y-1/2 transition-all duration-500 ease-in-out" style={{ width: `${((step - 1) / 2) * 100}%` }}></div>
+                
+                {[1, 2, 3].map((s) => (
+                  <div key={s} className={cn("w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors duration-500 bg-card border-2", step >= s ? "border-primary text-primary" : "border-muted text-muted-foreground", step === s && "bg-primary text-primary-foreground")}>
+                    {step > s ? <CheckCircle2 className="h-5 w-5" /> : s}
+                  </div>
+                ))}
+              </div>
 
-              {pricing && pricing.discount > 0 && (
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge className="bg-destructive/10 text-destructive border-destructive/20 gap-1">
-                    {pricing.label === 'Gap Filler Deal' ? <Zap className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-                    {pricing.discount}% OFF
-                  </Badge>
-                  <span className="text-sm font-medium text-destructive">{pricing.label}</span>
+              {step === 1 && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                  <h3 className="text-xl font-bold mb-4 font-display">Select Dates & Guests</h3>
+                  <p className="text-2xl font-bold mb-1">
+                    ₱{property.pricePerNight.toLocaleString()} <span className="text-sm font-normal text-muted-foreground">/ night</span>
+                  </p>
+
+                  {pricing && pricing.discount > 0 && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge className="bg-destructive/10 text-destructive border-destructive/20 gap-1">
+                        {pricing.label === 'Gap Filler Deal' ? <Zap className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                        {pricing.discount}% OFF
+                      </Badge>
+                      <span className="text-sm font-medium text-destructive">{pricing.label}</span>
+                    </div>
+                  )}
+
+                  {nights > 0 && (
+                    <div className="bg-muted/50 rounded-lg p-3 my-4 space-y-1 text-sm border">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Selected Dates</span>
+                        <span className="font-medium">{format(dateRange!.from!, 'MMM d')} → {format(dateRange!.to!, 'MMM d, yyyy')}</span>
+                      </div>
+                      <div className="flex justify-between pt-2 mt-2 border-t">
+                        <span className="text-muted-foreground">
+                          {pricing && pricing.discount > 0 ? (
+                            <>
+                              <span className="line-through opacity-70">₱{property.pricePerNight.toLocaleString()}</span>
+                              {' '}₱{effectivePrice.toLocaleString()} × {nights} night{nights > 1 ? 's' : ''}
+                            </>
+                          ) : (
+                            <>₱{property.pricePerNight.toLocaleString()} × {nights} night{nights > 1 ? 's' : ''}</>
+                          )}
+                        </span>
+                        <span className="font-semibold text-primary">₱{total.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-6 space-y-4">
+                    <div>
+                      <Label htmlFor="guests" className={cn(guests < 1 || guests > property.maxGuests ? "text-destructive" : "")}>Number of Guests</Label>
+                      <Input id="guests" type="number" min={1} max={property.maxGuests} value={guests} onChange={e => setGuests(Number(e.target.value))} className={cn(guests < 1 || guests > property.maxGuests ? "border-destructive focus-visible:ring-destructive" : "focus-visible:ring-primary", "transition-all duration-200 mt-1")} />
+                      {guests > property.maxGuests && <p className="text-xs text-destructive mt-1">Maximum {property.maxGuests} guests allowed.</p>}
+                    </div>
+                    
+                    <Button type="button" className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-all duration-300" size="lg" disabled={nights < 1 || guests > property.maxGuests || guests < 1} onClick={() => setStep(2)}>
+                      {nights < 1 ? 'Select Dates to Continue' : 'Continue to Details'}
+                    </Button>
+
+                    {showWaitlist && (
+                      <Button type="button" variant="outline" className="w-full gap-2 transition-all duration-300" onClick={handleJoinWaitlist}>
+                        <Bell className="h-4 w-4" /> Join Waitlist for Dates
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
 
-              {nights > 0 && (
-                <div className="bg-muted rounded-lg p-3 my-4 space-y-1 text-sm">
-                  <div className="flex justify-between">
-                    <span>{format(dateRange!.from!, 'MMM d')} → {format(dateRange!.to!, 'MMM d, yyyy')}</span>
+              {step === 2 && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="flex items-center gap-2 mb-6">
+                    <button type="button" onClick={() => setStep(1)} className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-full transition-colors"><ArrowLeft className="h-4 w-4"/></button>
+                    <h3 className="text-xl font-bold font-display">Guest Details</h3>
                   </div>
-                  <div className="flex justify-between">
-                    <span>
-                      {pricing && pricing.discount > 0 ? (
-                        <>
-                          <span className="line-through text-muted-foreground">₱{property.pricePerNight.toLocaleString()}</span>
-                          {' '}₱{effectivePrice.toLocaleString()} × {nights} night{nights > 1 ? 's' : ''}
-                        </>
-                      ) : (
-                        <>₱{property.pricePerNight.toLocaleString()} × {nights} night{nights > 1 ? 's' : ''}</>
-                      )}
-                    </span>
-                    <span className="font-semibold">₱{total.toLocaleString()}</span>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="name" className={cn(!guestName && "text-muted-foreground")}>Full Name <span className="text-destructive">*</span></Label>
+                      <Input id="name" required value={guestName} onChange={e => setGuestName(e.target.value)} placeholder="Juan Dela Cruz" className="mt-1 focus-visible:ring-primary transition-all duration-200" />
+                    </div>
+                    <div>
+                      <Label htmlFor="email" className={cn(!guestEmail && "text-muted-foreground")}>Email <span className="text-destructive">*</span></Label>
+                      <Input id="email" type="email" required value={guestEmail} onChange={e => setGuestEmail(e.target.value)} placeholder="juan@email.com" className="mt-1 focus-visible:ring-primary transition-all duration-200" />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone" className={cn(!guestPhone && "text-muted-foreground")}>Phone <span className="text-destructive">*</span></Label>
+                      <Input id="phone" type="tel" required value={guestPhone} onChange={e => setGuestPhone(e.target.value)} placeholder="+63 9XX XXX XXXX" className="mt-1 focus-visible:ring-primary transition-all duration-200" />
+                    </div>
+                    
+                    <Button type="button" className="w-full mt-6 bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 shadow-lg shadow-primary/20" size="lg" disabled={!guestName || !guestEmail || !guestPhone} onClick={() => setStep(3)}>
+                      Review Booking
+                    </Button>
                   </div>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-                <div>
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input id="name" required value={guestName} onChange={e => setGuestName(e.target.value)} placeholder="Juan Dela Cruz" />
+              {step === 3 && (
+                <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                  <div className="flex items-center gap-2 mb-6">
+                    <button type="button" onClick={() => setStep(2)} className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-full transition-colors"><ArrowLeft className="h-4 w-4"/></button>
+                    <h3 className="text-xl font-bold font-display">Confirm & Pay</h3>
+                  </div>
+                  
+                  <div className="bg-muted/30 rounded-lg p-5 border border-border/50 space-y-4 mb-6 text-sm">
+                    <div className="flex justify-between border-b border-border/50 pb-3">
+                      <span className="text-muted-foreground">Dates</span>
+                      <span className="font-medium text-right">{format(dateRange!.from!, 'MMM d')} → {format(dateRange!.to!, 'MMM d, yyyy')}<br/><span className="text-xs text-muted-foreground font-normal">{nights} night{nights > 1 ? 's' : ''}</span></span>
+                    </div>
+                    <div className="flex justify-between border-b border-border/50 pb-3">
+                      <span className="text-muted-foreground">Guests</span>
+                      <span className="font-medium text-right">{guests} Guest{guests > 1 ? 's' : ''}<br/><span className="text-xs text-muted-foreground font-normal">{guestName}</span></span>
+                    </div>
+                    <div className="flex justify-between pt-1 items-center">
+                      <span className="text-foreground font-medium">Total (PHP)</span>
+                      <span className="font-bold text-xl text-primary">₱{total.toLocaleString()}</span>
+                    </div>
+                  </div>
+                  
+                  <form onSubmit={handleSubmit}>
+                    <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 shadow-xl shadow-primary/20" size="lg" disabled={submitting}>
+                      {submitting ? 'Processing...' : 'Confirm Reservation'}
+                    </Button>
+                  </form>
                 </div>
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" required value={guestEmail} onChange={e => setGuestEmail(e.target.value)} placeholder="juan@email.com" />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input id="phone" type="tel" required value={guestPhone} onChange={e => setGuestPhone(e.target.value)} placeholder="+63 9XX XXX XXXX" />
-                </div>
-                <div>
-                  <Label htmlFor="guests">Number of Guests</Label>
-                  <Input id="guests" type="number" min={1} max={property.maxGuests} value={guests} onChange={e => setGuests(Number(e.target.value))} />
-                </div>
-
-                <Button type="submit" className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90" size="lg" disabled={submitting || nights < 1}>
-                  {nights < 1 ? 'Select Dates to Book' : `Confirm Booking · ₱${total.toLocaleString()}`}
-                </Button>
-
-                {showWaitlist && (
-                  <Button type="button" variant="outline" className="w-full gap-2" onClick={handleJoinWaitlist}>
-                    <Bell className="h-4 w-4" /> Join Waitlist for These Dates
-                  </Button>
-                )}
-              </form>
-
-              <p className="text-xs text-muted-foreground mt-4 text-center">
-                Dates unavailable? You can join our waitlist and get notified if a slot opens up.
-              </p>
+              )}
             </div>
           </div>
         </div>
