@@ -1,16 +1,20 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Building2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import useOnClickOutside from '@/hooks/useOnClickOutside';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+
+  useOnClickOutside(navRef, () => setOpen(false));
   const isHost = location.pathname.startsWith('/host');
 
   return (
-    <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b">
+    <nav ref={navRef} className="sticky top-0 z-50 bg-card/80 backdrop-blur-lg border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2">

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import useOnClickOutside from '@/hooks/useOnClickOutside';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Paperclip, Check, CheckCheck } from 'lucide-react';
 
@@ -53,6 +54,9 @@ export default function ConciergeChatBubble() {
   const [isOnline] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
+
+  useOnClickOutside(chatRef, () => setOpen(false));
 
   const now = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -98,6 +102,7 @@ export default function ConciergeChatBubble() {
             exit={{ opacity: 0, scale: 0.85, y: 24 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
             className="w-[350px] rounded-2xl overflow-hidden flex flex-col shadow-2xl"
+            ref={chatRef}
             style={{
               background: 'var(--chat-bg, #fff)',
               border: '1px solid rgba(99,102,241,0.18)',

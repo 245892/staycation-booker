@@ -71,7 +71,8 @@ const GalleryLightbox = ({
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex flex-col"
+        className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-sm flex flex-col cursor-pointer"
+        onClick={onClose}
       >
         <div className="flex items-center justify-between p-4 md:p-6 absolute top-0 w-full z-10">
           <span className="text-white/60 font-medium tracking-widest text-sm uppercase">
@@ -369,50 +370,21 @@ export default function PropertyDetail() {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* ── House Rules Section ── */}
+            </div>            {/* ── House Rules Section ── */}
             <div className="border-b pb-12">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white mb-6">House Rules</h2>
-              <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm bg-slate-50 dark:bg-slate-900/40 mb-8 max-w-2xl">
-                <img 
-                  src={houseRulesPoster} 
-                  alt="House Rules and Terms" 
-                  className="w-full h-auto"
-                />
+              <h2 className="text-2xl font-black font-display tracking-tight text-foreground mb-8">House Rules & Policies</h2>
+              <div className="rounded-3xl overflow-hidden border border-border shadow-sm bg-card transition-all duration-500">
+                <HouseRulesUI isInline={true} onAccept={() => {}} />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex gap-4 items-start">
-                    <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"><Clock className="h-5 w-5" /></div>
-                    <div>
-                      <p className="font-bold text-sm dark:text-white">Check-in / Out</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Check-in: 2:00 PM • Checkout: 12:00 PM</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4 items-start">
-                    <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"><Users className="h-5 w-5" /></div>
-                    <div>
-                      <p className="font-bold text-sm dark:text-white">Max Occupancy</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Strictly enforced per unit type</p>
-                    </div>
-                  </div>
+              
+              <div className="mt-8 flex flex-wrap gap-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Philippine LGU Compliant
                 </div>
-                <div className="space-y-4">
-                  <div className="flex gap-4 items-start">
-                    <div className="p-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400"><CigaretteOff className="h-5 w-5" /></div>
-                    <div>
-                      <p className="font-bold text-sm dark:text-white">No Smoking</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">₱5,000 penalty for violation</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-4 items-start">
-                    <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"><VolumeX className="h-5 w-5" /></div>
-                    <div>
-                      <p className="font-bold text-sm dark:text-white">Quiet Hours</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">No noise or parties after 10:00 PM</p>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full">
+                  <Clock className="h-3.5 w-3.5" />
+                  Contactless Key Handover
                 </div>
               </div>
             </div>

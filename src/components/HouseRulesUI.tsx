@@ -101,7 +101,7 @@ const RuleCard = ({ icon, title, description, penalty, index }: RuleCardProps) =
   );
 };
 
-export default function HouseRulesUI({ onAccept }: { onAccept: () => void }) {
+export default function HouseRulesUI({ onAccept, isInline = false }: { onAccept: () => void, isInline?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -148,33 +148,40 @@ export default function HouseRulesUI({ onAccept }: { onAccept: () => void }) {
   ];
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-md mx-auto pb-24 bg-background overflow-hidden min-h-[80vh]">
-      {/* Sticky Glass Nav */}
-      <motion.div 
-        style={{ opacity: stickyHeaderOpacity, y: stickyHeaderY }}
-        className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border px-6 py-4 flex items-center justify-between"
-      >
-        <h2 className="font-display font-bold text-lg text-foreground">House Rules</h2>
-        <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
-          Tropical Minimalist
-        </Badge>
-      </motion.div>
+    <div ref={containerRef} className={cn(
+      "relative w-full mx-auto bg-background overflow-hidden",
+      isInline ? "pb-0" : "pb-24 min-h-[80vh] max-w-5xl"
+    )}>
+      {/* Sticky Glass Nav - Only for non-inline */}
+      {!isInline && (
+        <motion.div 
+          style={{ opacity: stickyHeaderOpacity, y: stickyHeaderY }}
+          className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border px-6 py-4 flex items-center justify-between"
+        >
+          <h2 className="font-display font-bold text-lg text-foreground">House Rules</h2>
+          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+            Tropical Minimalist
+          </Badge>
+        </motion.div>
+      )}
 
-      {/* Main Header */}
-      <motion.div 
-        style={{ opacity: headerOpacity }}
-        className="px-6 pt-12 pb-8"
-      >
-        <Badge className="bg-primary/10 text-primary border-primary/20 mb-3 px-3 py-1">
-          Antigravity Principles
-        </Badge>
-        <h1 className="text-4xl font-black font-display tracking-tight text-foreground leading-tight">
-          House Rules & <br /> Stay Terms
-        </h1>
-        <p className="text-muted-foreground mt-4 text-sm leading-relaxed max-w-[280px]">
-          Designed for your comfort and safety in our Philippine-based staycation.
-        </p>
-      </motion.div>
+      {/* Main Header - Only for non-inline */}
+      {!isInline && (
+        <motion.div 
+          style={{ opacity: headerOpacity }}
+          className="px-6 pt-12 pb-8 text-center"
+        >
+          <Badge className="bg-primary/10 text-primary border-primary/20 mb-3 px-3 py-1">
+            Antigravity Principles
+          </Badge>
+          <h1 className="text-4xl sm:text-5xl font-black font-display tracking-tight text-foreground leading-tight">
+            House Rules & Stay Terms
+          </h1>
+          <p className="text-muted-foreground mt-4 text-sm leading-relaxed mx-auto max-w-sm">
+            Designed for your comfort and safety in our Philippine-based staycation.
+          </p>
+        </motion.div>
+      )}
 
       {/* Staggered Content Grid */}
       <motion.div 
@@ -188,7 +195,10 @@ export default function HouseRulesUI({ onAccept }: { onAccept: () => void }) {
             }
           }
         }}
-        className="px-6 space-y-4"
+        className={cn(
+          "px-6 grid gap-4",
+          isInline ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+        )}
       >
         {rules.map((rule, idx) => (
           <RuleCard 
@@ -207,7 +217,10 @@ export default function HouseRulesUI({ onAccept }: { onAccept: () => void }) {
             hidden: { opacity: 0, scale: 0.9 },
             visible: { opacity: 1, scale: 1 }
           }}
-          className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30 mt-8"
+          className={cn(
+            "p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/30",
+            isInline ? "col-span-full" : "md:col-span-2 lg:col-span-1"
+          )}
         >
           <div className="flex gap-3">
             <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
@@ -218,24 +231,27 @@ export default function HouseRulesUI({ onAccept }: { onAccept: () => void }) {
         </motion.div>
       </motion.div>
 
-      {/* Haptic CTA Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none sm:max-w-md sm:mx-auto">
-        <motion.button
-          whileTap={{ scale: 0.96 }}
-          whileHover={{ y: -2 }}
-          onClick={onAccept}
-          className="pointer-events-auto w-full py-4 rounded-2xl bg-primary text-primary-foreground font-black text-lg shadow-[0_20px_40px_-10px_rgba(var(--primary),0.3)] flex items-center justify-center gap-2 group relative overflow-hidden"
-        >
-          <motion.div 
-            className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"
-          />
-          I Agree & Accept
-          <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-        </motion.button>
-      </div>
+      {/* Haptic CTA Bar - Only for non-inline */}
+      {!isInline && (
+        <div className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none w-full flex justify-center">
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            whileHover={{ y: -2 }}
+            onClick={onAccept}
+            className="pointer-events-auto w-full max-w-md py-4 rounded-2xl bg-primary text-primary-foreground font-black text-lg shadow-[0_20px_40px_-10px_rgba(var(--primary),0.3)] flex items-center justify-center gap-2 group relative overflow-hidden"
+          >
+            <motion.div 
+              className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"
+            />
+            I Agree & Accept
+            <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+          </motion.button>
+        </div>
+      )}
     </div>
   );
 }
+
 
 function Badge({ children, className, variant = "default" }: { children: React.ReactNode, className?: string, variant?: "default" | "outline" }) {
   return (

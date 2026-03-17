@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
+import useOnClickOutside from '@/hooks/useOnClickOutside';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, ChevronDown, SlidersHorizontal, BedDouble, Users, DollarSign, Calendar, CheckCircle2, Clock, Brush, AlertTriangle, ChevronRight, ArrowUpRight } from 'lucide-react';
 import { properties } from '@/data/properties';
@@ -214,7 +215,10 @@ export default function UnitInventoryView({ bookings }: UnitInventoryViewProps) 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<UnitStatus[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
   const [selectedUnit, setSelectedUnit] = useState<UnitRow | null>(null);
+
+  useOnClickOutside(filterRef, () => setFilterOpen(false));
   const [unitStatuses, setUnitStatuses] = useState<Record<string, UnitStatus>>({});
 
   const today = startOfDay(new Date());
@@ -350,7 +354,7 @@ export default function UnitInventoryView({ bookings }: UnitInventoryViewProps) 
         </div>
 
         {/* Filter by Status */}
-        <div className="relative">
+        <div className="relative" ref={filterRef}>
           <button
             onClick={() => setFilterOpen(v => !v)}
             className={cn(

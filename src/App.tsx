@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "next-themes";
 import Footer from "@/components/Footer";
 import ConciergeChatBubble from "@/components/ConciergeChatBubble";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
               <Toaster />
               <Sonner />
               <BrowserRouter>
+                <ScrollToTop />
                 <Navbar />
                 <Routes>
                   <Route path="/" element={<Index />} />

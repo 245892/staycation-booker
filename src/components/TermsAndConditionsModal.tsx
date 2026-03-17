@@ -15,7 +15,7 @@ interface TermsAndConditionsModalProps {
 export default function TermsAndConditionsModal({ isOpen, onClose, onAccept }: TermsAndConditionsModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[460px] p-0 overflow-hidden border-none rounded-3xl bg-background max-h-[92vh] flex flex-col">
+      <DialogContent className="sm:max-w-3xl p-0 overflow-hidden border-none rounded-3xl bg-background max-h-[92vh] flex flex-col">
         <div className="flex-1 overflow-y-auto no-scrollbar">
           <HouseRulesUI onAccept={onAccept} />
         </div>
