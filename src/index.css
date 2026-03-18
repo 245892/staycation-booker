@@ -4,79 +4,116 @@
 
 @layer base {
   :root {
+    /* Dynamic Slate Palette Injection */
+    --slate-50: 210 40% 98%;
+    --slate-100: 210 40% 96%;
+    --slate-200: 214 32% 91%;
+    --slate-300: 213 27% 84%;
+    --slate-400: 215 20% 65%;
+    --slate-500: 215 16% 47%; /* #64748B (Captions/Small) */
+    --slate-600: 215 19% 35%;
+    --slate-700: 215 25% 27%; /* #334155 (Body Text) */
+    --slate-800: 215 28% 17%;
+    --slate-900: 222 47% 11%; /* #0F172A (Main Heading) */
+
     --background: 40 33% 98%;
-    --foreground: 220 25% 12%;
+    --foreground: 165 80% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 12%;
+    --card-foreground: 165 80% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 12%;
+    --popover-foreground: 165 80% 10%;
 
-    --primary: 220 40% 20%;
+    /* Modern CTA (Primary Blue) #2563EB */
+    --primary: 221 83% 53%;
     --primary-foreground: 40 33% 98%;
 
-    --secondary: 35 60% 52%;
-    --secondary-foreground: 0 0% 100%;
+    /* Warm Gold */
+    --secondary: 46 65% 52%;
+    --secondary-foreground: 40 33% 98%;
 
-    --muted: 40 20% 93%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 40 20% 90%;
+    --muted-foreground: 165 20% 40%;
 
-    --accent: 35 60% 52%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 46 65% 52%;
+    --accent-foreground: 40 33% 98%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 220 40% 20%;
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 165 80% 15%;
 
-    --radius: 0.625rem;
+    --radius: 0.5rem;
 
-    --sidebar-background: 220 25% 12%;
-    --sidebar-foreground: 40 33% 98%;
-    --sidebar-primary: 35 60% 52%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 30% 18%;
-    --sidebar-accent-foreground: 40 33% 98%;
-    --sidebar-border: 220 20% 22%;
-    --sidebar-ring: 35 60% 52%;
+    --sidebar-background: 40 33% 96%;
+    --sidebar-foreground: 165 80% 15%;
+    --sidebar-primary: 165 80% 15%;
+    --sidebar-primary-foreground: 40 33% 98%;
+    --sidebar-accent: 40 20% 90%;
+    --sidebar-accent-foreground: 165 80% 15%;
+    --sidebar-border: 40 20% 88%;
+    --sidebar-ring: 165 80% 15%;
 
     --success: 152 60% 40%;
-    --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+    --success-foreground: 40 33% 98%;
+    --warning: 46 65% 52%;
+    --warning-foreground: 40 33% 98%;
   }
 
   .dark {
-    --background: 220 25% 8%;
-    --foreground: 40 33% 98%;
-    --card: 220 25% 12%;
-    --card-foreground: 40 33% 98%;
-    --popover: 220 25% 12%;
-    --popover-foreground: 40 33% 98%;
-    --primary: 35 60% 52%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 30% 18%;
-    --secondary-foreground: 40 33% 98%;
-    --muted: 220 20% 16%;
-    --muted-foreground: 220 15% 60%;
-    --accent: 35 60% 52%;
-    --accent-foreground: 0 0% 100%;
+    /* Inversed Slate Palette Injection - WCAG AAA Optimized */
+    --slate-900: 210 40% 98%;   /* #F8FAFC (Slate-50 for Headings) */
+    --slate-800: 210 40% 96%;
+    --slate-700: 213 27% 84%;   /* #CBD5E1 (Slate-300 for Body Text) */
+    --slate-600: 214 32% 91%;
+    --slate-500: 215 20% 65%;   /* #94A3B8 (Slate-400 for Muted Text) */
+    --slate-400: 215 16% 47%;
+    --slate-300: 215 19% 35%;
+    --slate-200: 215 25% 27%;
+    --slate-100: 222 47% 11%;   /* #0F172A (Slate-900 for Surfaces) */
+    --slate-50: 222 47% 5%;    /* #020617 (Slate-950 for Background) */
+
+    --background: 222 47% 5%; /* Slate-950 #020617 */
+    --foreground: 213 27% 84%; /* Slate-300 #CBD5E1 */
+    
+    --card: 222 47% 11%; /* Slate-900 #0F172A */
+    --card-foreground: 210 40% 98%; /* Slate-50 */
+    
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    
+    /* Lighter Blue (Elevated CTA contrast on dark backgrounds) #3B82F6 */
+    --primary: 217 91% 60%; 
+    --primary-foreground: 222 47% 5%;
+    
+    /* Warm Gold */
+    --secondary: 46 65% 52%;
+    --secondary-foreground: 222 47% 5%;
+    
+    --muted: 222 47% 11%; /* Slate-900 */
+    --muted-foreground: 215 20% 65%; /* Slate-400 #94A3B8 */
+    
+    --accent: 46 65% 52%;
+    --accent-foreground: 222 47% 5%;
+    
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 220 20% 22%;
-    --input: 220 20% 22%;
-    --ring: 35 60% 52%;
-    --sidebar-background: 220 25% 6%;
-    --sidebar-foreground: 40 33% 98%;
-    --sidebar-primary: 35 60% 52%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 25% 12%;
-    --sidebar-accent-foreground: 40 33% 98%;
-    --sidebar-border: 220 20% 16%;
-    --sidebar-ring: 35 60% 52%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 165 45% 45%;
+    
+    --sidebar-background: 222 47% 5%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 165 45% 45%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 217 32% 12%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 32% 17%;
+    --sidebar-ring: 165 45% 45%;
   }
 }
 
@@ -87,6 +124,20 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  
+  .dark body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 450; /* Prevent background bleeding */
+  }
+
+  /* Accessibility Sharpness: Subtle shadow for white text on dark backgrounds */
+  .dark .text-white, 
+  .dark .text-slate-50,
+  .dark h1, .dark h2, .dark h3, .dark h4 {
+    text-shadow: 0 0 1px rgba(255,255,255,0.05);
   }
 }
 

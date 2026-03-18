@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,8 +14,7 @@ export default function HostLogin() {
   const navigate = useNavigate();
 
   if (isAuthenticated) {
-    navigate('/host/dashboard', { replace: true });
-    return null;
+    return <Navigate to="/host/dashboard" replace />;
   }
 
   const handleSubmit = (e: React.FormEvent) => {
