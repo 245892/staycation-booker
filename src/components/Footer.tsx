@@ -1,24 +1,30 @@
 import { Link } from 'react-router-dom';
 import { Shield, Lock, Instagram, Facebook, Linkedin } from 'lucide-react';
 
-const NAV_LINKS = {
+import { useState } from 'react';
+import TermsAndConditionsModal from './TermsAndConditionsModal';
+import { toast } from 'sonner';
+
+type NavLink = { label: string; href?: string; action?: 'terms' | 'toast' };
+
+const NAV_LINKS: Record<string, NavLink[]> = {
   company: [
-    { label: 'About Us', href: '#' },
-    { label: 'Careers', href: '#' },
-    { label: 'Press', href: '#' },
-    { label: 'Blog', href: '#' },
+    { label: 'About Us', action: 'toast' },
+    { label: 'Careers', action: 'toast' },
+    { label: 'Press', action: 'toast' },
+    { label: 'Blog', action: 'toast' },
   ],
   support: [
-    { label: 'Help Center', href: '#' },
-    { label: 'Cancellation Policy', href: '#' },
-    { label: 'Contact Us', href: '#' },
-    { label: 'House Rules', href: '#' },
+    { label: 'Help Center', action: 'toast' },
+    { label: 'Cancellation Policy', action: 'terms' },
+    { label: 'Contact Us', action: 'toast' },
+    { label: 'House Rules', action: 'terms' },
   ],
   legal: [
-    { label: 'Privacy Policy', href: '#' },
-    { label: 'Terms of Service', href: '#' },
-    { label: 'Cookie Policy', href: '#' },
-    { label: 'Accessibility', href: '#' },
+    { label: 'Privacy Policy', action: 'terms' },
+    { label: 'Terms of Service', action: 'terms' },
+    { label: 'Cookie Policy', action: 'toast' },
+    { label: 'Accessibility', action: 'toast' },
   ],
 };
 
@@ -28,18 +34,18 @@ const SOCIAL_LINKS = [
   { label: 'LinkedIn',  Icon: Linkedin,  href: '#', color: 'hover:text-sky-400'  },
 ];
 
-function LinkGroup({ title, links }: { title: string; links: { label: string; href: string }[] }) {
+function LinkGroup({ title, links, onAction }: { title: string; links: NavLink[]; onAction: (action: string, label: string) => void }) {
   return (
     <div className="flex flex-col gap-3">
       <h4 className="text-[11px] font-bold uppercase tracking-widest text-white/40 mb-1">{title}</h4>
       {links.map(l => (
-        <a
+        <button
           key={l.label}
-          href={l.href}
-          className="text-sm text-[#94a3b8] hover:text-white transition-colors duration-150 leading-none"
+          onClick={() => l.action ? onAction(l.action, l.label) : null}
+          className="text-sm text-[#94a3b8] hover:text-white transition-colors duration-150 leading-none text-left"
         >
           {l.label}
-        </a>
+        </button>
       ))}
     </div>
   );
@@ -47,6 +53,15 @@ function LinkGroup({ title, links }: { title: string; links: { label: string; hr
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+
+  const handleAction = (action: string, label: string) => {
+    if (action === 'terms') {
+      setIsTermsOpen(true);
+    } else {
+      toast.info(`${label} page is coming soon!`);
+    }
+  };
 
   return (
     <footer
@@ -87,13 +102,13 @@ export default function Footer() {
           </div>
 
           {/* Column 2: Company */}
-          <LinkGroup title="Company" links={NAV_LINKS.company} />
+          <LinkGroup title="Company" links={NAV_LINKS.company} onAction={handleAction} />
 
           {/* Column 3: Support */}
-          <LinkGroup title="Support" links={NAV_LINKS.support} />
+          <LinkGroup title="Support" links={NAV_LINKS.support} onAction={handleAction} />
 
           {/* Column 4: Legal */}
-          <LinkGroup title="Legal" links={NAV_LINKS.legal} />
+          <LinkGroup title="Legal" links={NAV_LINKS.legal} onAction={handleAction} />
         </div>
 
         {/* ── Trust Row ── */}
@@ -142,6 +157,12 @@ export default function Footer() {
           </p>
         </div>
       </div>
+      
+      <TermsAndConditionsModal 
+        isOpen={isTermsOpen} 
+        onClose={() => setIsTermsOpen(false)} 
+        onAccept={() => setIsTermsOpen(false)} 
+      />
     </footer>
   );
 }

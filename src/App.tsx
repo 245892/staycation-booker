@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BookingProvider } from "@/context/BookingContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { WaitlistProvider } from "@/context/WaitlistContext";
+import { ReviewProvider } from "@/context/ReviewContext";
 import Navbar from "@/components/Navbar";
 import Index from "./pages/Index";
 import PropertyDetail from "./pages/PropertyDetail";
@@ -17,6 +18,9 @@ import { ThemeProvider } from "next-themes";
 import Footer from "@/components/Footer";
 import ConciergeChatBubble from "@/components/ConciergeChatBubble";
 import ScrollToTop from "@/components/ScrollToTop";
+import { syncRealTime } from "@/lib/utils";
+
+syncRealTime();
 
 const queryClient = new QueryClient();
 
@@ -27,9 +31,10 @@ const App = () => (
         <AuthProvider>
           <BookingProvider>
             <WaitlistProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
+              <ReviewProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
                 <ScrollToTop />
                 <Navbar />
                 <Routes>
@@ -43,6 +48,7 @@ const App = () => (
                 <Footer />
                 <ConciergeChatBubble />
               </BrowserRouter>
+              </ReviewProvider>
             </WaitlistProvider>
           </BookingProvider>
         </AuthProvider>

@@ -1,21 +1,35 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useBookings } from '@/context/BookingContext';
+import { useReviews } from '@/context/ReviewContext';
 import { properties } from '@/data/properties';
 import { Button } from '@/components/ui/button';
 import { differenceInDays, format, isToday, isPast } from 'date-fns';
-import { 
-  ArrowLeft, Copy, MapPin, Clock, CalendarIcon, 
+import {
+  ArrowLeft, Copy, MapPin, Clock, CalendarIcon,
   CloudSun, Sun, CloudRain, ChevronDown, MessageCircle,
-  Car, Utensils, Sparkles, Moon, AlertCircle, Download
+  Car, Utensils, Sparkles, Moon, AlertCircle, Download,
+  Star, ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 import heroImg from '@/assets/hero-staycation.jpg';
 import unitImg from '@/assets/unit-preview.jpg';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 export default function GuestDashboard() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
   const { bookings } = useBookings();
+  const { reviews, addReview } = useReviews();
+  
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const booking = bookings.find(b => b.id === bookingId);
   const property = properties.find(p => p.id === booking?.propertyId);
@@ -32,10 +46,16 @@ export default function GuestDashboard() {
   const checkInDate = new Date(booking.checkIn);
   const checkOutDate = new Date(booking.checkOut);
   const daysUntilTrip = differenceInDays(checkInDate, new Date());
-  
-  // Logic: if today is check-in day or we are currently checked in
+
+  // Logic: if today is check-in day or we are currently checked in (using date-fns, which relies on app's current config/tz)
   const isCheckInDay = isToday(checkInDate) || (isPast(checkInDate) && !isPast(checkOutDate));
   
+  // Set precise local 11:00 AM checkout time strictly tracking user's computer time for review testing
+  const actualCheckoutTime = new Date(checkOutDate);
+  actualCheckoutTime.setHours(11, 0, 0, 0);
+  const isPastCheckout = new Date() > actualCheckoutTime;
+  const hasReviewed = reviews.some(r => r.bookingId === booking?.id);
+
   const handleCopyCode = () => {
     navigator.clipboard.writeText(booking.id.toUpperCase());
     toast.success('Confirmation code copied!');
@@ -54,16 +74,16 @@ export default function GuestDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24 font-sans text-slate-900">
-      
+
       {/* Dynamic Stay Countdown Hero */}
       <div className="relative h-[45vh] min-h-[320px] w-full isolate">
-        <img 
-          src={property.imageIndex % 2 === 0 ? heroImg : unitImg} 
-          alt={property.name} 
-          className="absolute inset-0 w-full h-full object-cover -z-20" 
+        <img
+          src={property.imageIndex % 2 === 0 ? heroImg : unitImg}
+          alt={property.name}
+          className="absolute inset-0 w-full h-full object-cover -z-20"
         />
         <div className="absolute inset-0 bg-slate-900/40 -z-10" />
-        
+
         <button onClick={() => navigate('/')} className="absolute top-6 left-4 sm:left-6 bg-white/20 hover:bg-white/30 backdrop-blur-md p-2 rounded-full transition-colors z-10 min-h-[44px] min-w-[44px] flex items-center justify-center">
           <ArrowLeft className="h-5 w-5 text-white" />
         </button>
@@ -74,7 +94,7 @@ export default function GuestDashboard() {
               {property.name}
             </span>
           </div>
-          
+
           {isCheckInDay ? (
             <div className="animate-in slide-in-from-bottom-4 duration-500">
               <h1 className="text-4xl sm:text-5xl font-display font-bold text-white mb-2 tracking-tight">Welcome to Manila!</h1>
@@ -88,10 +108,36 @@ export default function GuestDashboard() {
               <h1 className="text-5xl sm:text-6xl font-display font-bold text-white mb-2 tracking-tight">
                 {daysUntilTrip} <span className="text-2xl sm:text-3xl font-medium opacity-90 font-sans tracking-normal">days left</span>
               </h1>
-              <p className="text-white/90 text-lg mb-6 leading-snug">Until your luxury staycation at<br/>{property.name}.</p>
-              <Button variant="secondary" className="w-full sm:w-auto min-h-[48px] font-semibold bg-white text-slate-900 hover:bg-slate-100 rounded-xl shadow-md">
-                <MapPin className="mr-2 h-4 w-4" /> View Directions
-              </Button>
+              <p className="text-white/90 text-lg mb-6 leading-snug">Until your luxury staycation at<br />{property.name}.</p>
+              <HoverCard openDelay={200}>
+                <HoverCardTrigger asChild>
+                  <Button className="w-full sm:w-auto min-h-[48px] font-semibold bg-white text-slate-900 hover:bg-slate-100 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200 rounded-xl shadow-md cursor-help">
+                    <MapPin className="mr-2 h-4 w-4" /> View Directions
+                  </Button>
+                </HoverCardTrigger>
+                <HoverCardContent side="top" align="center" sideOffset={10} className="w-80 p-0 overflow-hidden shadow-2xl border-slate-200">
+                  <div className="bg-slate-50 p-3 border-b border-slate-100">
+                    <h4 className="text-sm font-semibold flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" /> SM Mall of Asia Complex
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-1">Seaside Blvd, Pasay, Metro Manila</p>
+                  </div>
+                  <div className="relative">
+                    <a href="https://www.google.com/maps/search/?api=1&query=SM+Mall+of+Asia+Complex,+Seaside+Blvd,+Pasay,+Metro+Manila" target="_blank" rel="noopener noreferrer" className="absolute top-2 left-2 z-10 bg-white hover:bg-slate-50 text-blue-600 px-3 py-1.5 rounded-sm shadow-md text-xs font-bold flex items-center gap-1.5 border border-slate-200 transition-colors">
+                      Open in Maps <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                    <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15448.971511252119!2d120.9754!3d14.5323!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397cb318ad4df81%3A0xe7bc36a4fabb6f7!2sSM%20Mall%20of%20Asia!5e0!3m2!1sen!2sph!4v1700000000000!5m2!1sen!2sph"
+                      width="100%"
+                      height="200"
+                      style={{ border: 0 }}
+                      allowFullScreen={false}
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    ></iframe>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
             </div>
           )}
         </div>
@@ -99,7 +145,7 @@ export default function GuestDashboard() {
 
       {/* Main Content Area */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 -mt-8 relative z-10 space-y-16">
-        
+
         {/* Payment Banner */}
         {booking.paymentStatus === 'pending' && (
           <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 animate-in slide-in-from-bottom-2 fade-in">
@@ -119,91 +165,133 @@ export default function GuestDashboard() {
         )}
 
         {/* Core Trip Details Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+        <div className="bg-white dark:bg-slate-950 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <p className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Confirmation</p>
+              <p className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Confirmation</p>
               <div className="flex items-center gap-2">
-                <span className="font-display text-xl font-bold tracking-tight">{booking.id.toUpperCase()}</span>
-                <button onClick={handleCopyCode} className="text-slate-400 hover:text-slate-600 p-1.5 rounded-md hover:bg-slate-50 transition-colors" title="Copy code">
+                <span className="font-display text-xl font-bold tracking-tight dark:text-white">{booking.id.toUpperCase()}</span>
+                <button onClick={handleCopyCode} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1.5 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" title="Copy code">
                   <Copy className="h-4 w-4" />
                 </button>
               </div>
             </div>
-            
+
             <div className="flex gap-2">
               {booking.paymentStatus === 'paid' && (
                 <Button variant="outline" size="icon" className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 min-h-[40px] w-10 transition-colors" title="Download Invoice">
                   <Download className="h-4 w-4" />
                 </Button>
               )}
-              <Button variant="outline" className="rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 min-h-[40px] transition-colors">
-                Manage <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
+              <Dialog open={isReviewModalOpen} onOpenChange={setIsReviewModalOpen}>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-block cursor-not-allowed">
+                        <DialogTrigger asChild>
+                          <Button disabled={!isPastCheckout || hasReviewed} variant="outline" className={`rounded-xl border-slate-200 text-slate-600 min-h-[40px] transition-colors ${(!isPastCheckout || hasReviewed) ? 'pointer-events-none opacity-50' : 'hover:bg-slate-50 hover:text-slate-900'}`}>
+                            {hasReviewed ? 'Review Submitted' : 'Write a Review'} <Star className="ml-2 h-4 w-4" />
+                          </Button>
+                        </DialogTrigger>
+                      </span>
+                    </TooltipTrigger>
+                    {(!isPastCheckout || hasReviewed) && (
+                      <TooltipContent side="top" className="bg-slate-900 text-white font-medium shadow-xl border-0">
+                        <p>{hasReviewed ? 'You have already submitted a review for this stay.' : 'You can write a review after your checkout date.'}</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Write a Review</DialogTitle>
+                    <DialogDescription>
+                      Share your experience at {property.name} with others.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="space-y-2">
+                      <Label>Overall Rating</Label>
+                      <div className="flex gap-1" onMouseLeave={() => setHoverRating(0)}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star 
+                            key={star} 
+                            onClick={() => setRating(star)}
+                            onMouseEnter={() => setHoverRating(star)}
+                            className={`h-8 w-8 cursor-pointer transition-all ${
+                              star <= (hoverRating || rating) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-200 hover:text-yellow-400 hover:fill-yellow-400'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="review">Your Review</Label>
+                      <Textarea id="review" value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="What did you love about your stay?" className="resize-none" rows={4} />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button 
+                      onClick={() => {
+                        if (rating === 0) {
+                          toast.error('Please select a star rating first.');
+                          return;
+                        }
+                        addReview({
+                          propertyId: property.id,
+                          bookingId: booking.id,
+                          name: 'Guest (You)',
+                          rating,
+                          text: reviewText,
+                          date: format(new Date(), 'MMM dd, yyyy')
+                        });
+                        toast.success('Review submitted successfully! Thank you.');
+                        setIsReviewModalOpen(false);
+                      }} 
+                      className="w-full sm:w-auto"
+                    >
+                      Submit Review
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 bg-slate-50 rounded-xl p-4 mb-6">
+          <div className="grid grid-cols-2 gap-4 bg-slate-50 rounded-xl p-4 mb-6 border border-slate-200">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Check-in</p>
-              <p className="font-bold">{format(checkInDate, 'MMM d, yyyy')}</p>
-              <span className="text-sm text-slate-500 flex items-center gap-1 mt-0.5"><Clock className="h-3 w-3"/> 3:00 PM</span>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Check-in</p>
+              <p className="font-bold text-lg text-slate-900 tracking-tight">{format(checkInDate, 'MMM d, yyyy')}</p>
+              <span className="text-sm font-medium text-slate-600 flex items-center gap-1.5 mt-1"><Clock className="h-4 w-4" /> 3:00 PM</span>
             </div>
             <div className="border-l pl-4 border-slate-200">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Check-out</p>
-              <p className="font-bold">{format(checkOutDate, 'MMM d, yyyy')}</p>
-              <span className="text-sm text-slate-500 flex items-center gap-1 mt-0.5"><Clock className="h-3 w-3"/> 11:00 AM</span>
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Check-out</p>
+              <p className="font-bold text-lg text-slate-900 tracking-tight">{format(checkOutDate, 'MMM d, yyyy')}</p>
+              <span className="text-sm font-medium text-slate-600 flex items-center gap-1.5 mt-1"><Clock className="h-4 w-4" /> 11:00 AM</span>
             </div>
           </div>
 
-          <div className="border-t border-slate-100 pt-5">
-            <h3 className="font-semibold text-sm mb-3">Weather during your stay</h3>
+          <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
+            <h3 className="font-semibold text-sm mb-3 dark:text-slate-200">Weather during your stay</h3>
             <div className="flex justify-between items-center text-center">
               <div>
                 <span className="text-xs text-slate-500 block mb-1">{format(checkInDate, 'EEE')}</span>
                 <Sun className="h-6 w-6 text-amber-500 mx-auto mb-1" />
-                <span className="text-sm font-semibold">32°</span>
+                <span className="text-sm font-semibold dark:text-white">32°</span>
               </div>
               <div>
                 <span className="text-xs text-slate-500 block mb-1">{format(new Date(checkInDate.getTime() + 86400000), 'EEE')}</span>
-                <CloudSun className="h-6 w-6 text-slate-400 mx-auto mb-1" />
-                <span className="text-sm font-semibold">30°</span>
+                <CloudSun className="h-6 w-6 text-slate-400 dark:text-slate-500 mx-auto mb-1" />
+                <span className="text-sm font-semibold dark:text-white">30°</span>
               </div>
               <div>
                 <span className="text-xs text-slate-500 block mb-1">{format(new Date(checkInDate.getTime() + 172800000), 'EEE')}</span>
-                <CloudRain className="h-6 w-6 text-slate-400 mx-auto mb-1" />
-                <span className="text-sm font-semibold">28°</span>
+                <CloudRain className="h-6 w-6 text-slate-400 dark:text-slate-500 mx-auto mb-1" />
+                <span className="text-sm font-semibold dark:text-white">28°</span>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Digital Concierge & Add-ons Rail */}
-        <div>
-          <h2 className="font-display text-2xl font-bold tracking-tight mb-4 px-2">Elevate your stay</h2>
-          <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide scroll-px-4 sm:scroll-px-0">
-            {addOnItems.map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <div key={idx} className="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm min-w-[160px] snap-start shrink-0 flex flex-col justify-between">
-                  <div className="mb-4">
-                    <div className="bg-slate-50 w-10 h-10 rounded-full flex items-center justify-center mb-3">
-                      <Icon className="h-5 w-5 text-slate-700" />
-                    </div>
-                    <h3 className="font-semibold text-sm leading-tight mb-1">{item.title}</h3>
-                    <span className="text-xs text-slate-500 font-medium">{item.price}</span>
-                  </div>
-                  <Button variant="secondary" size="sm" className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-lg min-h-[36px] font-semibold text-xs transition-colors">
-                    Add to stay
-                  </Button>
-                </div>
-              );
-            })}
-            {/* Nano Banana Edge Spacer */}
-            <div className="w-1 shrink-0 snap-end"></div>
-          </div>
-        </div>
-
       </div>
 
       {/* Floating Communication Hub */}

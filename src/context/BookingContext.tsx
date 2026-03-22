@@ -3,7 +3,7 @@ import { Booking } from '@/types/booking';
 
 interface BookingContextType {
   bookings: Booking[];
-  addBooking: (booking: Omit<Booking, 'id' | 'createdAt'>) => boolean;
+  addBooking: (booking: Omit<Booking, 'id' | 'createdAt'>) => string | false;
   updateBookingStatus: (id: string, status: Booking['status']) => void;
   isDateRangeAvailable: (propertyId: string, checkIn: string, checkOut: string) => boolean;
   getBookingsForProperty: (propertyId: string) => Booking[];
@@ -38,7 +38,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     );
   }, [bookings]);
 
-  const addBooking = useCallback((booking: Omit<Booking, 'id' | 'createdAt'>): boolean => {
+  const addBooking = useCallback((booking: Omit<Booking, 'id' | 'createdAt'>): string | false => {
     if (!isDateRangeAvailable(booking.propertyId, booking.checkIn, booking.checkOut)) {
       return false;
     }
@@ -48,7 +48,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date().toISOString(),
     };
     setBookings(prev => [...prev, newBooking]);
-    return true;
+    return newBooking.id;
   }, [isDateRangeAvailable]);
 
   const updateBookingStatus = useCallback((id: string, status: Booking['status']) => {

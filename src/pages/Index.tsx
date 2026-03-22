@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useBookings } from '@/context/BookingContext';
 import { isWithinInterval, startOfDay } from 'date-fns';
 import { properties } from '@/data/properties';
@@ -9,6 +9,10 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { getPhTime } from '@/lib/utils';
+import { useReviews } from '@/context/ReviewContext';
 
 // The featured property is always the Pearl Suite (moa-303) — highest floor, "penthouse" feel.
 // We use gallery image [2] (The View shot) since it has a right-side focal point (city skyline)
@@ -157,18 +161,29 @@ function FeaturedSpotlight() {
 }
 
 const VIBES = [
-
   { id: 'city', label: 'City Scapes', icon: Building2 },
   { id: 'mall', label: 'Near the Mall', icon: ShoppingBag },
   { id: 'business', label: 'Business Ready', icon: Briefcase },
-  { id: 'hidden', label: 'Hidden Gems', icon: Sparkles },
+  { id: 'reviews', label: 'Reviews', icon: Star },
 ];
 
 const Index = () => {
   const [showProof, setShowProof] = useState(false);
   const [activeVibe, setActiveVibe] = useState<string | null>(null);
+  const [showCheckBooking, setShowCheckBooking] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
+  const [bookingIdInput, setBookingIdInput] = useState('');
+  const navigate = useNavigate();
   const { bookings } = useBookings();
-  const today = startOfDay(new Date());
+  const { reviews } = useReviews();
+  const today = startOfDay(getPhTime());
+
+  const handleCheckBooking = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (bookingIdInput.trim()) {
+      navigate(`/guest/dashboard/${bookingIdInput.trim()}`);
+    }
+  };
 
   const checkAvailability = (propertyId: string) => {
     return !bookings.some(b => 
@@ -222,9 +237,35 @@ const Index = () => {
                <Button onClick={() => document.getElementById('units')?.scrollIntoView({ behavior: 'smooth' })} className="px-8 py-7 text-lg font-bold rounded-2xl bg-primary text-primary-foreground shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
                  Browse Available Units
                </Button>
-               <Button variant="outline" className="px-8 py-7 text-lg font-bold rounded-2xl border-2 hover:bg-slate-50 transition-all">
-                 Our Standards
-               </Button>
+               <Dialog open={showCheckBooking} onOpenChange={setShowCheckBooking}>
+                 <DialogTrigger asChild>
+                   <Button variant="outline" className="px-8 py-7 text-lg font-bold rounded-2xl border-2 hover:bg-slate-50 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400 transition-all">
+                     Check My Booking
+                   </Button>
+                 </DialogTrigger>
+                 <DialogContent className="sm:max-w-md">
+                   <DialogHeader>
+                     <DialogTitle>Check My Booking</DialogTitle>
+                     <DialogDescription>
+                       Enter your Booking ID to view your reservation details and status.
+                     </DialogDescription>
+                   </DialogHeader>
+                   <form onSubmit={handleCheckBooking} className="space-y-4 pt-4">
+                     <div className="space-y-2">
+                       <Input 
+                         id="bookingId" 
+                         placeholder="e.g. BK-XYZ123" 
+                         value={bookingIdInput} 
+                         onChange={(e) => setBookingIdInput(e.target.value)} 
+                         required 
+                       />
+                     </div>
+                     <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+                       Find Booking
+                     </Button>
+                   </form>
+                 </DialogContent>
+               </Dialog>
             </div>
           </div>
         </div>
@@ -277,7 +318,13 @@ const Index = () => {
               return (
                 <button 
                   key={vibe.id} 
-                  onClick={() => setActiveVibe(isActive ? null : vibe.id)}
+                  onClick={() => {
+                    if (vibe.id === 'reviews') {
+                      setShowReviews(true);
+                    } else {
+                      setActiveVibe(isActive ? null : vibe.id);
+                    }
+                  }}
                   className="group flex flex-col items-center gap-3 min-w-[80px] outline-none"
                 >
                   <div className={`h-16 w-16 rounded-full flex items-center justify-center transition-all duration-300 ${isActive ? 'bg-primary shadow-lg shadow-primary/20 scale-110' : 'bg-slate-100 dark:bg-slate-800/50 group-hover:bg-primary group-hover:shadow-lg group-hover:shadow-primary/20 group-hover:scale-110'}`}>
@@ -314,6 +361,39 @@ const Index = () => {
           )}
         </div>
       </section>
+
+      {/* Reviews Modal */}
+      <Dialog open={showReviews} onOpenChange={setShowReviews}>
+        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Guest Reviews</DialogTitle>
+            <DialogDescription>See what our recent guests have to say about their stay.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            {reviews.map((review) => {
+              const propertyName = properties.find(p => p.id === review.propertyId)?.name || 'Staycation Unit';
+              return (
+              <div key={review.id} className="bg-slate-50 border border-border shadow-sm rounded-xl p-5">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <p className="font-semibold text-sm text-foreground">{review.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{review.date} • {propertyName}</p>
+                  </div>
+                  <div className="flex gap-0.5">
+                    {Array.from({length: 5}).map((_, idx) => (
+                      <Star key={idx} className={`w-3.5 h-3.5 ${idx < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-200'}`} />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm text-slate-700 italic">"{review.text}"</p>
+              </div>
+            )})}
+            {reviews.length === 0 && (
+              <p className="text-center text-sm text-slate-500 py-6">No reviews have been posted yet. Be the first!</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

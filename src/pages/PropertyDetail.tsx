@@ -10,14 +10,14 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { format, differenceInDays, addDays, isBefore, isSameDay } from 'date-fns';
-import { ArrowLeft, Users, Bed, Wifi, ChefHat, Waves, Eye, Clock, Zap, Bell, CheckCircle2, Star, Award, ChevronDown, CalendarIcon, View, Maximize, X, ChevronLeft, ChevronRight, PlayCircle, ShieldCheck, CigaretteOff, VolumeX } from 'lucide-react';
+import { ArrowLeft, Users, Bed, Wifi, ChefHat, Waves, Eye, Clock, Zap, Bell, CheckCircle2, Star, Award, ChevronDown, CalendarIcon, View, Maximize, X, ChevronLeft, ChevronRight, PlayCircle, ShieldCheck, CigaretteOff, VolumeX, AlertCircle } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import heroImg from '@/assets/hero-staycation.jpg';
 import unitImg from '@/assets/unit-preview.jpg';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { cn, getPhTime } from '@/lib/utils';
 import { getDynamicPrice, isGapFillerDate } from '@/lib/pricing';
 import LocationNeighborhood from '@/components/LocationNeighborhood';
 import MobileStickyBar from '@/components/MobileStickyBar';
@@ -141,6 +141,7 @@ export default function PropertyDetail() {
   const [showTerms, setShowTerms] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showWaitlist, setShowWaitlist] = useState(false);
+  const [confirmedBookingId, setConfirmedBookingId] = useState<string | null>(null);
   
   // Gallery State
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -208,7 +209,7 @@ export default function PropertyDetail() {
     }
 
     setSubmitting(true);
-    const success = addBooking({
+    const result = addBooking({
       propertyId: property.id,
       guestName,
       guestEmail,
@@ -216,13 +217,14 @@ export default function PropertyDetail() {
       checkIn: dateRange.from.toISOString(),
       checkOut: dateRange.to.toISOString(),
       guests,
-      status: 'confirmed',
+      status: 'pending',
       totalPrice: total,
     });
 
-    if (success) {
+    if (result) {
+      setConfirmedBookingId(result);
+      setStep(4);
       toast.success('Booking confirmed!', { description: `${property.name} · ${nights} night${nights > 1 ? 's' : ''}` });
-      navigate('/');
     } else {
       toast.error('These dates are no longer available.');
       setShowWaitlist(true);
@@ -409,16 +411,18 @@ export default function PropertyDetail() {
             <div ref={bookingWidgetRef} className="bg-background rounded-2xl p-6 border shadow-sm sticky top-28 bottom-0 lg:bottom-auto z-50 lg:z-auto">
               
               {/* Progress Indicator */}
-              <div className="flex items-center justify-between mb-8 relative px-2">
-                <div className="absolute left-0 top-1/2 w-full h-0.5 bg-slate-100 -z-10 -translate-y-1/2"></div>
-                <div className="absolute left-0 top-1/2 h-0.5 bg-primary -z-10 -translate-y-1/2 transition-all duration-500 ease-in-out" style={{ width: `${((step - 1) / 2) * 100}%` }}></div>
-                
-                {[1, 2, 3].map((s) => (
-                  <div key={s} className={cn("w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors duration-500 bg-background border-2", step >= s ? "border-primary text-primary" : "border-slate-200 text-slate-400", step === s && "bg-primary text-primary-foreground")}>
-                    {step > s ? <CheckCircle2 className="h-5 w-5" /> : s}
-                  </div>
-                ))}
-              </div>
+              {step < 4 && (
+                <div className="flex items-center justify-between mb-8 relative px-2">
+                  <div className="absolute left-0 top-1/2 w-full h-0.5 bg-slate-100 -z-10 -translate-y-1/2"></div>
+                  <div className="absolute left-0 top-1/2 h-0.5 bg-primary -z-10 -translate-y-1/2 transition-all duration-500 ease-in-out" style={{ width: `${((step - 1) / 2) * 100}%` }}></div>
+                  
+                  {[1, 2, 3].map((s) => (
+                    <div key={s} className={cn("w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors duration-500 bg-background border-2", step >= s ? "border-primary text-primary" : "border-slate-200 text-slate-400", step === s && "bg-primary text-primary-foreground")}>
+                      {step > s ? <CheckCircle2 className="h-5 w-5" /> : s}
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {step === 1 && (
                 <div className="animate-in fade-in slide-in-from-right-4 duration-300">
@@ -456,7 +460,7 @@ export default function PropertyDetail() {
                           selected={dateRange}
                           onSelect={setDateRange}
                           numberOfMonths={1}
-                          disabled={[{ before: new Date() }, ...bookedDates.map(d => d)]}
+                          disabled={[{ before: getPhTime() }, ...bookedDates.map(d => d)]}
                           className="p-3"
                         />
                       </PopoverContent>
@@ -582,6 +586,46 @@ export default function PropertyDetail() {
                       handleSubmit({ preventDefault: () => {} } as any);
                     }}
                   />
+                </div>
+              )}
+
+              {step === 4 && confirmedBookingId && (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 text-center py-4">
+                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle2 className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-2xl font-bold font-display tracking-tight text-slate-900 mb-2">Booking Confirmed!</h3>
+                  <p className="text-slate-600 mb-6">You're all set for your stay at <span className="font-semibold text-slate-900">{property.name}</span>.</p>
+                  
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 mb-6 text-left space-y-3">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Booking Details</p>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-slate-600">Booking ID</span>
+                      <span className="font-bold text-slate-900 font-mono text-base">{confirmedBookingId}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm border-t border-slate-200 pt-3">
+                      <span className="text-slate-600">Dates</span>
+                      <span className="font-medium text-slate-900 text-right">{format(dateRange!.from!, 'MMM d')} → {format(dateRange!.to!, 'MMM d, yyyy')}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm border-t border-slate-200 pt-3">
+                      <span className="text-slate-600">Total Amount</span>
+                      <span className="font-bold text-primary">₱{total.toLocaleString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-8 text-amber-800 text-sm flex items-start gap-3 text-left">
+                    <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <p>Please take a screenshot of your <strong>Booking ID</strong> for your reference or check your bookings from the home page.</p>
+                  </div>
+
+                  <Button 
+                    type="button" 
+                    className="w-full bg-slate-900 text-white hover:bg-slate-800 transition-all duration-300 shadow-xl" 
+                    size="lg" 
+                    onClick={() => navigate('/')}
+                  >
+                    Return to Home
+                  </Button>
                 </div>
               )}
             </div>
